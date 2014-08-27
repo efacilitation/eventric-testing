@@ -11,7 +11,7 @@ class ProjectionFactory
 
   _instantiateProjection: (ProjectionClass) ->
     projection = new ProjectionClass
-    projection.$store = mongodb: @_createProjectionStoreMongoDb()
+    projection.$store = mongodb: @mongoDbStoreStub()
     projection.$adapter = stubFactory.stub()
     projection
 
@@ -29,7 +29,7 @@ class ProjectionFactory
     projection
 
 
-  _createProjectionStoreMongoDb: ->
+  mongoDbStoreStub: ->
     projectionStoreMongoDb =
       find: stubFactory.stub()
       findOne: stubFactory.stub()

@@ -59,4 +59,8 @@ eventric.testing =
     domainEventHandlersFactory.wiredDomainEventHandlers args...
 
 
+  projectionStoreMongoDbStub: (args...) ->
+    projectionFactory.mongoDbStoreStub args...
+
+
 module.exports = eventric.testing

@@ -1,5 +1,6 @@
-stubFactory = require './stub_factory'
-fakePromise = require './fake_promise'
+stubFactory         = require './stub_factory'
+fakePromise         = require './fake_promise'
+projectionFactory   = require './projection_factory'
 
 class CommandQueryFactory
 
@@ -20,6 +21,7 @@ class CommandQueryFactory
       $projectionStore: stubFactory.stub()
       $emitDomainEvent: stubFactory.stub()
     stubFactory.configureReturnValue di.$repository, @repositoryStub()
+    stubFactory.configureReturnValue di.$projectionStore, projectionFactory.mongoDbStoreStub()
     handler = handler.bind di
     for key of di
       handler[key] = di[key]
