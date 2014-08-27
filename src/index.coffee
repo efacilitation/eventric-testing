@@ -6,6 +6,7 @@ fakePromise                 = require './fake_promise'
 commandQueryFactory         = require './command_query_factory'
 projectionFactory           = require './projection_factory'
 domainEventHandlersFactory  = require './domain_event_handlers_factory'
+remoteFactory               = require './remote_factory'
 
 
 eventric.testing =
@@ -53,6 +54,10 @@ eventric.testing =
 
   repositoryStub: (args...) ->
     commandQueryFactory.repositoryStub args...
+
+
+  wiredRemote: (args...) ->
+    remoteFactory.wiredRemote args...
 
 
   wiredDomainEventHandlers: (args...) ->
