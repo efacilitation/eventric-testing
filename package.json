@@ -1,0 +1,70 @@
+{
+  "name": "eventric-testing",
+  "description": "Testing helpers for eventric.js",
+  "url": "http://eventricjs.org",
+  "keywords": [
+    "cqrs",
+    "cqs",
+    "ddd",
+    "dddd",
+    "domain driven",
+    "domain model",
+    "events",
+    "event sourcing",
+    "event driven",
+    "es",
+    "ead",
+    "boundedcontext",
+    "microservice",
+    "shared",
+    "client",
+    "server",
+    "eventric"
+  ],
+  "author": "eFa Team <team@efa-gmbh.com>",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/efacilitation/eventric-testing.git"
+  },
+  "main": "build/node/index.js",
+  "scripts": {
+    "test": "node_modules/.bin/gulp spec",
+    "prepublish": "node_modules/.bin/gulp build"
+  },
+  "devDependencies": {
+    "canonical-path": "*",
+    "chai": "*",
+    "coffee-script": "*",
+    "commonjs-require": "*",
+    "gulp": "*",
+    "gulp-util": "*",
+    "gulp-mocha": "*",
+    "gulp-karma": "*",
+    "gulp-coffee": "*",
+    "gulp-concat": "*",
+    "gulp-wrap-commonjs": "*",
+    "gulp-uglify": "*",
+    "gulp-bump": "*",
+    "karma": "*",
+    "karma-coffee-preprocessor": "*",
+    "karma-phantomjs-launcher": "*",
+    "karma-spec-reporter": "*",
+    "karma-mocha": "*",
+    "mocha": "*",
+    "rimraf": "*",
+    "run-sequence": "*",
+    "sinon": "*",
+    "sinon-chai": "*"
+  },
+  "dependencies": {},
+  "peerDependencies": {
+    "eventric": "*"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/efacilitation/eventric-testing/blob/master/LICENSE"
+    }
+  ]
+}
