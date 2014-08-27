@@ -1,10 +1,11 @@
-eventric              = require 'eventric'
+eventric                    = require 'eventric'
 
-stubFactory           = require './stub_factory'
-aggregateFactory      = require './aggregate_factory'
-fakePromise           = require './fake_promise'
-commandQueryFactory   = require './command_query_factory'
-projectionFactory     = require './projection_factory'
+stubFactory                 = require './stub_factory'
+aggregateFactory            = require './aggregate_factory'
+fakePromise                 = require './fake_promise'
+commandQueryFactory         = require './command_query_factory'
+projectionFactory           = require './projection_factory'
+domainEventHandlersFactory  = require './domain_event_handlers_factory'
 
 
 eventric.testing =
@@ -49,6 +50,13 @@ eventric.testing =
   wiredProjection: (args...) ->
     projectionFactory.wiredProjection args...
 
+
+  repositoryStub: (args...) ->
+    commandQueryFactory.repositoryStub args...
+
+
+  wiredDomainEventHandlers: (args...) ->
+    domainEventHandlersFactory.wiredDomainEventHandlers args...
 
 
 module.exports = eventric.testing

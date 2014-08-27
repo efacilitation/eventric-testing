@@ -19,14 +19,14 @@ class CommandQueryFactory
       $query:           stubFactory.stub()
       $projectionStore: stubFactory.stub()
       $emitDomainEvent: stubFactory.stub()
-    stubFactory.configureReturnValue di.$repository, @createRepositoryStub()
+    stubFactory.configureReturnValue di.$repository, @repositoryStub()
     handler = handler.bind di
     for key of di
       handler[key] = di[key]
     handler
 
 
-  createRepositoryStub: ->
+  repositoryStub: ->
     findByIdStub = stubFactory.stub()
     saveStub = stubFactory.stub()
     createStub = stubFactory.stub()

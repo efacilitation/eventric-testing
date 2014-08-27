@@ -44,14 +44,4 @@ class ProjectionFactory
     projectionStoreMongoDb
 
 
-  # TODO: This function is used for domain event handlers
-  # TODO: Refactor to something less crazy to support domain event handlers testing
-  ###
-  Object.keys(domainEventHandlerObject).forEach (key) ->
-    if typeof domainEventHandlerObject[key] is 'function'
-      domainEventHandlerObject["handle#{key}"] = (domainEvent) ->
-        domainEventHandlerObject[key].call this, domainEvent, ->
-  ###
-
-
 module.exports = new ProjectionFactory

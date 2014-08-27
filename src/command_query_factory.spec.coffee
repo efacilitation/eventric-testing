@@ -16,7 +16,7 @@ describe 'command/query factory', ->
         expect(@$adapter).to.equal wiredCommandHandler.$adapter
         expect(@$repository).to.be.a 'function'
         expect(@$repository).to.equal wiredCommandHandler.$repository
-        expect(@$repository('Example')).to.deep.equal commandQueryFactory.createRepositoryStub()
+        expect(@$repository('Example')).to.deep.equal commandQueryFactory.repositoryStub()
         expect(@$domainService).to.be.a 'function'
         expect(@$domainService).to.equal wiredCommandHandler.$domainService
         expect(@$query).to.be.a 'function'
@@ -37,7 +37,7 @@ describe 'command/query factory', ->
         expect(@$adapter).to.equal wiredQueryHandler.$adapter
         expect(@$repository).to.be.a 'function'
         expect(@$repository).to.equal wiredQueryHandler.$repository
-        expect(@$repository('Example')).to.deep.equal commandQueryFactory.createRepositoryStub()
+        expect(@$repository('Example')).to.deep.equal commandQueryFactory.repositoryStub()
         expect(@$domainService).to.be.a 'function'
         expect(@$domainService).to.equal wiredQueryHandler.$domainService
         expect(@$query).to.be.a 'function'
