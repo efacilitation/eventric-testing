@@ -31,8 +31,8 @@ eventric.testing =
     fakePromise.rejectAsync args...
 
 
-  aggregate: (args...) ->
-    aggregateFactory.aggregate args...
+  fakeAggregate: (args...) ->
+    aggregateFactory.fakeAggregate args...
 
 
   wiredAggregate: (args...) ->
