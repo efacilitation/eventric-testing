@@ -3,8 +3,9 @@ stubFactory       = require './stub_factory'
 
 class ProjectionFactory
 
-  wiredProjection: (ProjectionClass, domainEvents) ->
+  wiredProjection: (ProjectionClass, [projectionParams]..., domainEvents) ->
     projection = @_instantiateProjection ProjectionClass
+    @_initializeProjection projection, projectionParams
     @_wireProjection projection, domainEvents
     projection
 
@@ -16,16 +17,27 @@ class ProjectionFactory
     projection
 
 
+  _initializeProjection: (projection, params) ->
+    if projection.initialize
+      projection.$subscribeHandlersWithAggregateId = (aggregateId) ->
+        projection.__subscribedAggregateId = aggregateId
+      projection.initialize params
+
+
   _wireProjection: (projection, domainEvents) ->
     class FakeAggregateClass
     fakeAggregate = aggregateFactory.instantiateAggregateWithFakeContext FakeAggregateClass, domainEvents
     originalHandleDomainEvent = fakeAggregate._handleDomainEvent
     fakeAggregate._handleDomainEvent = -> originalHandleDomainEvent.apply {root: projection}, arguments
+
     projection.$emitDomainEvent = (eventName, aggregateId, payload) ->
       fakeAggregate.id = aggregateId
+      if projection.__subscribedAggregateId and projection.__subscribedAggregateId isnt aggregateId
+        return
       if not projection["handle#{eventName}"]
         throw new Error "Domain Event Handler has not subscribed to domain event #{eventName}"
       fakeAggregate.emitDomainEvent.call fakeAggregate, eventName, payload
+
     projection
 
 

@@ -1,28 +1,36 @@
-eventric      = require 'eventric'
-Remote        = require 'eventric/src/remote'
-DomainEvent   = require 'eventric/src/domain_event'
+eventric        = require 'eventric'
+Remote          = require 'eventric/src/remote'
+remoteInMemory  = require 'eventric/src/remote_inmemory'
 
-stubFactory = require './stub_factory'
+domainEventFactory    = require './domain_event_factory.coffee'
+stubFactory           = require './stub_factory'
 
 class RemoteFactory
 
   wiredRemote: (contextName, domainEvents) ->
+
     wiredRemote = new Remote contextName
     wiredRemote._domainEvents = []
+    wiredRemote.addClient 'inmemory', remoteInMemory.client
+    wiredRemote.set 'default client', 'inmemory'
 
-    wiredRemote.populateWithDomainEvent = (domainEventName, aggregateId, domainEventPayload) ->
+    wiredRemote.$populateWithDomainEvent = (domainEventName, aggregateId, domainEventPayload) ->
+      @_domainEvents.push @_createDomainEvent domainEventName, aggregateId, domainEventPayload
+
+
+    wiredRemote.$emitDomainEvent = (domainEventName, aggregateId, domainEventPayload) ->
+      domainEvent = @_createDomainEvent domainEventName, aggregateId, domainEventPayload
+      remoteInMemory.endpoint.publish contextName, domainEvent.name, domainEvent
+      if domainEvent.aggregate
+        remoteInMemory.endpoint.publish contextName, domainEvent.name, domainEvent.aggregate.id, domainEvent
+      @_domainEvents.push domainEvent
+
+
+    wiredRemote._createDomainEvent = (domainEventName, aggregateId, domainEventPayload) ->
       DomainEventClass = domainEvents[domainEventName]
       if not DomainEventClass
         throw new Error 'Trying to populate wired remote with unknown domain event ' + domainEventName
-      domainEvent = new DomainEvent
-        id: eventric.generateUid()
-        name: domainEventName
-        aggregate:
-          id: aggregateId
-          name: 'eventric-testing'
-        context: contextName
-        payload: new DomainEventClass domainEventPayload
-      @_domainEvents.push domainEvent
+      domainEventFactory.createDomainEvent contextName, domainEventName, DomainEventClass, aggregateId, domainEventPayload
 
 
     wiredRemote.findDomainEventsByName = (names) ->

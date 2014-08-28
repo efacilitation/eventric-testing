@@ -10,26 +10,59 @@ describe 'projection factory', ->
   describe '#wiredProjection', ->
     stub = null
 
-    class ExampleProjection
+    describe 'when given a regular projection', ->
 
-      handleExampleCreated: (args...) ->
-        stub args...
+      class ExampleProjection
 
-
-    domainEvents =
-      ExampleCreated: (params) ->
-        @foo = params.foo
+        handleExampleCreated: (args...) ->
+          stub args...
 
 
-    it 'should instantiate a projection which is capable of emitting and handling domain events', ->
-      stub = sandbox.stub()
-      projection = projectionFactory.wiredProjection ExampleProjection, domainEvents
-      projection.$emitDomainEvent 'ExampleCreated', 1, foo: 'bar'
-      expect(stub).to.have.been.calledWith
-        context: "eventric-testing"
-        name: "ExampleCreated"
-        payload:
-          foo: 'bar'
-        timestamp: sinon.match.number
-        id: sinon.match.string
-        aggregate: sinon.match.object
+      domainEvents =
+        ExampleCreated: (params) ->
+          @foo = params.foo
+
+
+      it 'should instantiate a projection which is capable of emitting and handling domain events', ->
+        stub = sandbox.stub()
+        projection = projectionFactory.wiredProjection ExampleProjection, domainEvents
+        projection.$emitDomainEvent 'ExampleCreated', 1, foo: 'bar'
+        expect(stub).to.have.been.calledWith
+          context: "eventric-testing"
+          name: "ExampleCreated"
+          payload:
+            foo: 'bar'
+          timestamp: sinon.match.number
+          id: sinon.match.string
+          aggregate: sinon.match.object
+
+
+
+    describe 'when given a projection which subscribes to events with a specific aggregate id', ->
+
+      class ExampleProjection
+
+        initialize: (params) ->
+          @$subscribeHandlersWithAggregateId params.aggregateId
+
+        handleExampleCreated: (args...) ->
+          stub args...
+
+
+      domainEvents =
+        ExampleCreated: (params) ->
+          @foo = params.foo
+
+
+      it 'should instantiate a projection which handles domain events with matching aggregate id', ->
+        stub = sandbox.stub()
+        projection = projectionFactory.wiredProjection ExampleProjection, aggregateId: 1, domainEvents
+        projection.$emitDomainEvent 'ExampleCreated', 1, foo: 'bar'
+        expect(stub).to.have.been.called
+
+
+      it 'should instantiate a projection which does not handle domain events with not matching aggregate id', ->
+        stub = sandbox.stub()
+        projection = projectionFactory.wiredProjection ExampleProjection, aggregateId: 1, domainEvents
+        projection.$emitDomainEvent 'ExampleCreated', 2, foo: 'bar'
+        expect(stub).not.to.have.been.called

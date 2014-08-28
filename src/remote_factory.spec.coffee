@@ -1,33 +1,43 @@
-describe.only 'remote factory', ->
+describe 'remote factory', ->
 
   remoteFactory = require './remote_factory'
 
+  class ExampleProjection
+    initialize: (params) ->
+      @$subscribeHandlersWithAggregateId params.aggregateId
+
+
+    handleExampleCreated: (domainEvent) ->
+      @projectedCreated = domainEvent.payload.assignedCreated
+
+
+    handleExampleModified: (domainEvent) ->
+      @projectedModified = domainEvent.payload.assignedModified
+
+
+  domainEvents =
+    ExampleCreated: (params) ->
+      @assignedCreated = params.emittedCreated
+    ExampleModified: (params) ->
+      @assignedModified = params.emittedModified
+
+
+  wiredRemote = null
+  beforeEach ->
+    wiredRemote = remoteFactory.wiredRemote 'context', domainEvents
+
   describe '#wiredRemote', ->
 
-    it 'should create a remote which can be populated with manually created domain events', ->
-
-      class ExampleProjection
-
-        initialize: (params) ->
-          @$subscribeHandlersWithAggregateId params.aggregateId
-
-        handleExampleCreated: (domainEvent) ->
-          @projectedCreated = domainEvent.payload.constructedCreated
-
-        handleExampleModified: (domainEvent) ->
-          @projectedModified = domainEvent.payload.constructedModified
-
-      domainEvents =
-        ExampleCreated: (params) ->
-          @constructedCreated = params.emittedCreated
-        ExampleModified: (params) ->
-          @constructedModified = params.emittedModified
+    it 'should create a wired remote with helper functions', ->
+      expect(wiredRemote.$populateWithDomainEvent).to.be.a 'function'
+      expect(wiredRemote.$emitDomainEvent).to.be.a 'function'
 
 
-      wiredRemote = remoteFactory.wiredRemote 'context', domainEvents
-      wiredRemote.populateWithDomainEvent 'ExampleCreated', 123, emittedCreated: true
-      wiredRemote.populateWithDomainEvent 'ExampleModified', 123, emittedModified: true
+  describe '#wiredRemote.$populateWithDomainEvent', ->
 
+    it 'should populate the remote with the given event which is applied to later created projections', ->
+      wiredRemote.$populateWithDomainEvent 'ExampleCreated', 123, emittedCreated: true
+      wiredRemote.$populateWithDomainEvent 'ExampleModified', 123, emittedModified: true
       wiredRemote.addProjection 'ExampleProjection', ExampleProjection
       wiredRemote.initializeProjectionInstance 'ExampleProjection',
         aggregateId: 123
@@ -42,3 +52,25 @@ describe.only 'remote factory', ->
       expect(-> wiredRemote.populateWithDomainEvent 'Foobar').to.throw Error
 
 
+  describe '#wiredRemote.$emitDomainEvent', ->
+
+    it 'should populate the remote with the given event which is applied to later created projections', ->
+      wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+      wiredRemote.addProjection 'ExampleProjection', ExampleProjection
+      wiredRemote.initializeProjectionInstance 'ExampleProjection',
+        aggregateId: 123
+      .then (projectionId) ->
+        projection = wiredRemote.getProjectionInstance projectionId
+        expect(projection.projectedCreated).to.be.true
+
+
+    it 'should publish the domain event so domain event subscribers are notified of it', (done) ->
+      wiredRemote.addProjection 'ExampleProjection', ExampleProjection
+      wiredRemote.initializeProjectionInstance 'ExampleProjection',
+        aggregateId: 123
+      .then (projectionId) ->
+        projection = wiredRemote.getProjectionInstance projectionId
+        projection.eventBus.subscribe 'changed', ->
+          expect(projection.projectedCreated).to.be.true
+          done()
+        wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true

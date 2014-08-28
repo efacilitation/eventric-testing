@@ -7,6 +7,7 @@ commandQueryFactory         = require './command_query_factory'
 projectionFactory           = require './projection_factory'
 domainEventHandlersFactory  = require './domain_event_handlers_factory'
 remoteFactory               = require './remote_factory'
+domainEventFactory          = require './domain_event_factory'
 
 
 eventric.testing =
@@ -66,6 +67,10 @@ eventric.testing =
 
   projectionStoreMongoDbStub: (args...) ->
     projectionFactory.mongoDbStoreStub args...
+
+
+  createDomainEvent: (args...) ->
+    domainEventFactory.createDomainEvent args...
 
 
 module.exports = eventric.testing

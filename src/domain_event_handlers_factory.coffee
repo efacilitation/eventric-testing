@@ -9,11 +9,13 @@ class DomainEventHandlersFactory
     fakeAggregate = aggregateFactory.instantiateAggregateWithFakeContext FakeAggregateClass, domainEvents
     originalHandleDomainEvent = fakeAggregate._handleDomainEvent
     fakeAggregate._handleDomainEvent = -> originalHandleDomainEvent.apply {root: eventHandlersProxy}, arguments
+
     eventHandlersProxy.$emitDomainEvent = (eventName, aggregateId, payload) ->
       fakeAggregate.id = aggregateId
       if not eventHandlersProxy["handle#{eventName}"]
         throw new Error "Domain Event Handler has not subscribed to domain event #{eventName}"
       fakeAggregate.emitDomainEvent.call fakeAggregate, eventName, payload
+
     eventHandlersProxy
 
 
