@@ -2,7 +2,7 @@ eventric        = require 'eventric'
 Remote          = require 'eventric/src/remote'
 remoteInMemory  = require 'eventric/src/remote_inmemory'
 
-domainEventFactory    = require './domain_event_factory.coffee'
+domainEventFactory    = require './domain_event_factory'
 stubFactory           = require './stub_factory'
 
 class RemoteFactory
