@@ -37,6 +37,8 @@
     "chai": "*",
     "coffee-script": "*",
     "commonjs-require": "*",
+    "dgeni": "*",
+    "dgeni-packages": "*",
     "gulp": "*",
     "gulp-util": "*",
     "gulp-mocha": "*",
