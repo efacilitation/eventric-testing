@@ -21,14 +21,12 @@ eventric.testing =
   *
   * Configure the stub methods eventric-testing should use.
   *
-  * @example
-  *
-  * Use eventric-testing with sinon stubs:
-  ```javascript
-  beforeEach(function() {
-    eventricTesting.setStubMethods(sandbox.stub, function(stub, returnValue) { stub.returns(returnValue); });
-  });
-  ```
+  * Example for use of eventric-testing with sinon stubs:
+  * ```javascript
+  * beforeEach(function() {
+  *   eventricTesting.setStubMethods(sandbox.stub, function(stub, returnValue) { stub.returns(returnValue); });
+  * });
+  * ```
   ###
   setStubMethods: (stubMethod, configureReturnValueMethod) ->
     stubFactory.setStubMethod stubMethod
@@ -43,14 +41,13 @@ eventric.testing =
   *
   * Returns a promise like object which synchronously executes the success handler provided via .then()
   *
-  * @example
-  *
-  ```javascript
-  var loadUser = eventricTesting.resolve({username: 'John Doe});
-  loadUser.then(function(user) {
-    console.log(user);
-  });
-  ```
+  * Example:
+  * ```javascript
+  * var loadUser = eventricTesting.resolve({username: 'John Doe});
+  * loadUser.then(function(user) {
+  *   console.log(user);
+  * });
+  * ```
   ###
   resolve: (args...) ->
     fakePromise.resolve args...
@@ -64,14 +61,13 @@ eventric.testing =
   *
   * Returns a promise like object which synchronously executes the error handler provided via .catch()
   *
-  * @example
-  *
-  ```javascript
-  var loadUser = eventricTesting.reject(new Error('User could not be loaded'));
-  loadUser.error(function(error) {
-    console.log(error);
-  });
-  ```
+  * Example:
+  * ```javascript
+  * var loadUser = eventricTesting.reject(new Error('User could not be loaded'));
+  * loadUser.error(function(error) {
+  *   console.log(error);
+  * });
+  * ```
   ###
   reject: (args...) ->
     fakePromise.reject args...
@@ -86,14 +82,13 @@ eventric.testing =
   * Returns a promise like object which asynchronously executes the success handler provided via .then()
   * The execution of the success handler is scheduled via setTimeout(fn, 0);
   *
-  * @example
-  *
-  ```javascript
-  var loadUser = eventricTesting.resolveAsync({username: 'John Doe});
-  loadUser.then(function(user) {
-    console.log(user);
-  });
-  ```
+  * Example:
+  * ```javascript
+  * var loadUser = eventricTesting.resolveAsync({username: 'John Doe});
+  * loadUser.then(function(user) {
+  *   console.log(user);
+  * });
+  * ```
   ###
   resolveAsync: (args...) ->
     fakePromise.resolveAsync args...
@@ -108,14 +103,13 @@ eventric.testing =
   * Returns a promise like object which asynchronously executes the error handler provided via .catch()
   * The execution of the error handler is scheduled via setTimeout(fn, 0);
   *
-  * @example
-  *
-  ```javascript
-  var loadUser = eventricTesting.reject(new Error('User could not be loaded'));
-  loadUser.error(function(error) {
-    console.log(error);
-  });
-  ```
+  * Example:
+  * ```javascript
+  * var loadUser = eventricTesting.reject(new Error('User could not be loaded'));
+  * loadUser.error(function(error) {
+  *   console.log(error);
+  * });
+  * ```
   ###
   rejectAsync: (args...) ->
     fakePromise.rejectAsync args...
@@ -144,27 +138,26 @@ eventric.testing =
   * Creates an instance of the given aggregate class which can emit domain events to itself and handle them.
   * The passed in domain events object is used to verify event name correctness and to construct the event payload.
   *
-  * @example
+  * Example:
+  * ```javascript
+  * var Aggregate = function() {
+  *   this.create = function(callback) {
+  *     this.$emitDomainEvent('AggregateCreated', {foo: 'bar'});
+  *   };
+  *   this.handleAggregateCreated = function(domainEvent) {
+  *     this.foo = domainEvent.payload.foo;
+  *   };
+  * };
+  * var domainEvents = {
+  *   AggregateCreated: function(params) {
+  *     this.foo = params.foo;
+  *   }
+  * }
   *
-  ```javascript
-  var Aggregate = function() {
-    this.create = function(callback) {
-      this.$emitDomainEvent('AggregateCreated', {foo: 'bar'});
-    };
-    this.handleAggregateCreated = function(domainEvent) {
-      this.foo = domainEvent.payload.foo;
-    };
-  };
-  var domainEvents = {
-    AggregateCreated: function(params) {
-      this.foo = params.foo;
-    }
-  }
-
-  aggregate = eventricTesting.wiredAggregate(Aggregate, domainEvents);
-  aggregate.create(function() {});
-  expect(aggregate.foo).to.equal('bar');
-  ```
+  * aggregate = eventricTesting.wiredAggregate(Aggregate, domainEvents);
+  * aggregate.create(function() {});
+  * expect(aggregate.foo).to.equal('bar');
+  * ```
   ###
   wiredAggregate: (args...) ->
     aggregateFactory.wiredAggregate args...
@@ -182,22 +175,21 @@ eventric.testing =
   * $repository and $projectionStore also return stubbed instances when called.
   * The services are also exposed on the created function itself for easier testing.
   *
-  * @example
-  *
-  ```javascript
-  var handlers = {
-    DoSomething: function(params) {
-      this.$repository('Aggregate').findById(params.id)
-      .then(function(aggregate) {
-        aggregate.doSomething();
-      });
-      // ...
-    }
-  };
-  var doSomething = eventricTesting.wiredCommandHandler(handlers.DoSomething);
-  doSomething({id: 1234});
-  expect(doSomething.$repository.findById).to.have.been.calledWith(1234);
-  ```
+  * Example:
+  * ```javascript
+  * var handlers = {
+  *   DoSomething: function(params) {
+  *     this.$repository('Aggregate').findById(params.id)
+  *     .then(function(aggregate) {
+  *       aggregate.doSomething();
+  *     });
+  *     // ...
+  *   }
+  * };
+  * var doSomething = eventricTesting.wiredCommandHandler(handlers.DoSomething);
+  * doSomething({id: 1234});
+  * expect(doSomething.$repository.findById).to.have.been.calledWith(1234);
+  * ```
   ###
   wiredCommandHandler: (args...) ->
     commandQueryFactory.wiredCommandHandler args...
@@ -215,21 +207,20 @@ eventric.testing =
   * $repository and $projectionStore also return stubbed instances when called.
   * The services are also exposed on the created function itself for easier testing.
   *
-  * @example
-  *
-  ```javascript
-  var handlers = {
-    findSomething: function(params) {
-      this.$repository('Aggregate').findById(params.id)
-      .then(function(aggregate) {
-        return aggregate;
-      });
-    }
-  };
-  var findSomething = eventricTesting.wiredQueryHandler(handlers.findSomething);
-  findSomething({id: 1234});
-  expect(findSomething.$repository.findById).to.have.been.calledWith(1234);
-  ```
+  * Example:
+  * ```javascript
+  * var handlers = {
+  *   findSomething: function(params) {
+  *     this.$repository('Aggregate').findById(params.id)
+  *     .then(function(aggregate) {
+  *       return aggregate;
+  *     });
+  *   }
+  * };
+  * var findSomething = eventricTesting.wiredQueryHandler(handlers.findSomething);
+  * findSomething({id: 1234});
+  * expect(findSomething.$repository.findById).to.have.been.calledWith(1234);
+  * ```
   ###
   wiredQueryHandler: (args...) ->
     commandQueryFactory.wiredQueryHandler args...
@@ -246,23 +237,22 @@ eventric.testing =
   * Creates an instance of the given projection class which can emit domain events to itself and handle them.
   * The passed in domain events object is used to verify event name correctness and to construct the event payload.
   *
-  * @example
+  * Example:
+  * ```javascript
+  * var AggregateProjection = function() {
+  *   this.aggregateCount = 0;
+  *   this.handleAggregateCreated = function(domain) {
+  *     this.aggregateCount++;
+  *   };
+  * };
+  * var domainEvents = {
+  *   AggregateCreated: function(params) {}
+  * }
   *
-  ```javascript
-  var AggregateProjection = function() {
-    this.aggregateCount = 0;
-    this.handleAggregateCreated = function(domain) {
-      this.aggregateCount++;
-    };
-  };
-  var domainEvents = {
-    AggregateCreated: function(params) {}
-  }
-
-  projection = eventricTesting.wiredProjection(AggregateProjection, domainEvents);
-  projection.$emitDomainEvent('AggregateCreated', {});
-  expect(projection.aggregateCount).to.equal(1);
-  ```
+  * projection = eventricTesting.wiredProjection(AggregateProjection, domainEvents);
+  * projection.$emitDomainEvent('AggregateCreated', {});
+  * expect(projection.aggregateCount).to.equal(1);
+  * ```
   * Note: This works for both normal projections and remote projections.
   ###
   wiredProjection: (args...) ->
@@ -278,14 +268,13 @@ eventric.testing =
   * The stubbed functions are: findById(), create() and save().
   * All of them return a synchronously resolving promise like object.
   *
-  * @example
-  *
-  ```javascript
-  var repository = eventricTesting.repositoryStub()
-  repository.save().then(function() {
-    console.log('got saved');
-  });
-  ```
+  * Example:
+  * ```javascript
+  * var repository = eventricTesting.repositoryStub()
+  * repository.save().then(function() {
+  *   console.log('got saved');
+  * });
+  * ```
   ###
   repositoryStub: (args...) ->
     commandQueryFactory.repositoryStub args...
@@ -302,34 +291,33 @@ eventric.testing =
   * The remote is capable of being (pre-)populated with domain events and publishing domain events to subscribers.
   * The pre-population is useful to verify that projections are correctly built for domain events occurred in the past.
   *
-  * @example
-  *
-  ```javascript
-  var domainEvents = {
-    SomethingCreated: function() {},
-    SomethingModified: function() {}
-  };
-  var RemoteProjection = function() {
-    this.actionLog = [];
-    this.handleSomethingCreated: function() {
-      this.actionLog.push('created');
-    }
-    this.SomethingModified: function() {
-      this.actionLog.push('modified');
-    }
-  };
-  var wiredRemote = eventricTesting.wiredRemote('example', domainEvents);
-  wiredRemote.$populateWithDomainEvent('SomethingCreated', {});
-  wiredRemote.$populateWithDomainEvent('SomethingModified', {});
-  wiredRemote.addProjection('RemoteProjection', RemoteProjection);
-  wiredRemote.initializeProjectionInstance('RemoteProjection')
-  .then(function(projectionId) {
-    projection = wiredRemote.getProjectionInstance(projectionId);
-    expect(projection.actionLog).to.deep.equal(['created', 'modified']);
-    wiredRemote.$emitDomainEvent('SomethingCreated', {});
-    expect(projection.actionLog.length).to.equal(3);
-  });
-  ```
+  * Example:
+  * ```javascript
+  * var domainEvents = {
+  *   SomethingCreated: function() {},
+  *   SomethingModified: function() {}
+  * };
+  * var RemoteProjection = function() {
+  *   this.actionLog = [];
+  *   this.handleSomethingCreated: function() {
+  *     this.actionLog.push('created');
+  *   }
+  *   this.SomethingModified: function() {
+  *     this.actionLog.push('modified');
+  *   }
+  * };
+  * var wiredRemote = eventricTesting.wiredRemote('example', domainEvents);
+  * wiredRemote.$populateWithDomainEvent('SomethingCreated', {});
+  * wiredRemote.$populateWithDomainEvent('SomethingModified', {});
+  * wiredRemote.addProjection('RemoteProjection', RemoteProjection);
+  * wiredRemote.initializeProjectionInstance('RemoteProjection')
+  * .then(function(projectionId) {
+  *   projection = wiredRemote.getProjectionInstance(projectionId);
+  *   expect(projection.actionLog).to.deep.equal(['created', 'modified']);
+  *   wiredRemote.$emitDomainEvent('SomethingCreated', {});
+  *   expect(projection.actionLog.length).to.equal(3);
+  * });
+  * ```
   ###
   wiredRemote: (args...) ->
     remoteFactory.wiredRemote args...
@@ -344,21 +332,20 @@ eventric.testing =
   *
   * Creates an object which is capable to emit domain
   *
-  * @example
-  *
-  ```javascript
-  var handlers = {
-  findSomething: function(params) {
-    this.$repository('Aggregate').findById(params.id)
-    .then(function(aggregate) {
-      return aggregate;
-    });
-  }
-  };
-  var findSomething = eventricTesting.wiredQueryHandler(handlers.findSomething);
-  findSomething({id: 1234});
-  expect(findSomething.$repository.findById).to.have.been.calledWith(1234);
-  ```
+  * Example:
+  * ```javascript
+  * var handlers = {
+  *   findSomething: function(params) {
+  *     this.$repository('Aggregate').findById(params.id)
+  *     .then(function(aggregate) {
+  *       return aggregate;
+  *     });
+  *   }
+  * };
+  * var findSomething = eventricTesting.wiredQueryHandler(handlers.findSomething);
+  * findSomething({id: 1234});
+  * expect(findSomething.$repository.findById).to.have.been.calledWith(1234);
+  * ```
   ###
   wiredDomainEventHandlers: (args...) ->
     domainEventHandlersFactory.wiredDomainEventHandlers args...
@@ -372,14 +359,13 @@ eventric.testing =
   * Creates a stubbed version of a mongo db projection store.
   * The returned object mostly resembles the functions available on a mongo db collection.
   *
-  * @example
-  *
-  ```javascript
-  var projectionStore = eventricTesting.projectionStoreMongoDbStub()
-  projectionStore.upsert().then(function() {
-    console.log('got saved');
-  });
-  ```
+  * Example:
+  * ```javascript
+  * var projectionStore = eventricTesting.projectionStoreMongoDbStub()
+  * projectionStore.upsert().then(function() {
+  *   console.log('got saved');
+  * });
+  * ```
   ###
   projectionStoreMongoDbStub: (args...) ->
     projectionFactory.mongoDbStoreStub args...
@@ -396,11 +382,13 @@ eventric.testing =
   *
   * Creates an instance of eventric's DomainEvent using the provided metadata, constructor and payload.
   *
-  ```javascript
-  var SomethingHappened = function(params) {
-    this.foo = params.foo
-  }
-  var domainEvent = eventricTesting.createDomainEvent('example', 'SomethingHappened', SomethingHappened, '1234', {foo: 'bar'});
+  * Example:
+  * ```javascript
+  * var SomethingHappened = function(params) {
+  *   this.foo = params.foo
+  * }
+  * var domainEvent = eventricTesting.createDomainEvent('example', 'SomethingHappened', SomethingHappened, '1234', {foo: 'bar'});
+  * ```
   ###
   createDomainEvent: (args...) ->
     domainEventFactory.createDomainEvent args...
