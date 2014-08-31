@@ -61,8 +61,7 @@
     "mockery": "*",
     "lodash": "*"
   },
-  "dependencies": {},
-  "peerDependencies": {
+  "dependencies": {
     "eventric": "*"
   },
   "licenses": [
