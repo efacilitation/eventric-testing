@@ -1,6 +1,6 @@
 ![eventric logo](https://raw.githubusercontent.com/wiki/efacilitation/eventric/eventric_logo.png)
 
-## eventric-testing
+## eventric-testing [![Build Status](https://travis-ci.org/efacilitation/eventric-testing.svg?branch=master)](https://travis-ci.org/efacilitation/eventric-testing)
 
 Testing is important. This library supports you in writing unit tests and feature specs more easily.
 

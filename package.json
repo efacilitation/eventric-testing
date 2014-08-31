@@ -57,7 +57,8 @@
     "rimraf": "*",
     "run-sequence": "*",
     "sinon": "*",
-    "sinon-chai": "*"
+    "sinon-chai": "*",
+    "mockery": "*"
   },
   "dependencies": {},
   "peerDependencies": {

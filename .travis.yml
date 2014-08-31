@@ -1,0 +1,9 @@
+language: node_js
+node_js:
+- '0.10'
+services:
+- mongodb
+notifications:
+  hipchat:
+    rooms:
+      secure: AxiQBqJ74PfbLvWSLEaMAKD3V5P9pm0lqYl/ix+pHrxBVXpHtXSpKh9XZEw/qICaBwLmoPpEv0yb+klRYJ8jPeYbOYgl53TbUqFnpQyYr/Xz4AcsHrE6MDZOrA+UJfzosf2CjTrXwenId2BPXZHK57N4Swzhl03zfuq9uZNeW+c=
