@@ -58,7 +58,8 @@
     "run-sequence": "*",
     "sinon": "*",
     "sinon-chai": "*",
-    "mockery": "*"
+    "mockery": "*",
+    "lodash": "*"
   },
   "dependencies": {},
   "peerDependencies": {
