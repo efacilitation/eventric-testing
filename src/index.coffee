@@ -326,25 +326,26 @@ eventric.testing =
   ###*
   * @name wiredDomainEventHandlers
   * @param {Object} domainEventHandlers Domain event handlers object
-  * @param {Object} domainEvents Domain event handlers object
+  * @param {Object} domainEvents Object of associated domainEvents with name as key and constructor as value
   *
   * @description
   *
-  * Creates an object which is capable to emit domain
+  * Creates an object which is capable to emit domain events to itself and let the handler functions handle them.
   *
   * Example:
   * ```javascript
+  * var domainEvents = {
+  *   SomethingCreated: function() {}
+  * };
   * var handlers = {
-  *   findSomething: function(params) {
-  *     this.$repository('Aggregate').findById(params.id)
-  *     .then(function(aggregate) {
-  *       return aggregate;
-  *     });
+  *   SomethingCreated: function(domainEvent) {
+  *     ...
   *   }
   * };
-  * var findSomething = eventricTesting.wiredQueryHandler(handlers.findSomething);
-  * findSomething({id: 1234});
-  * expect(findSomething.$repository.findById).to.have.been.calledWith(1234);
+  * var wiredHandlers = eventricTesting.wiredDomainEventHandlers(handlers);
+  * sandbox.stub(wiredHandlers, 'SomethingCreated');
+  * wiredHandlers.$emitDomainEvent('SomethingCreated', {});
+  * expect(wiredHandlers.SomethingCreated).to.have.been.called();
   * ```
   ###
   wiredDomainEventHandlers: (args...) ->

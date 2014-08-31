@@ -23,6 +23,8 @@ beforeEach(function() {
   eventricTesting.setStubMethods(sandbox.stub, function(stub, returnValue) { stub.returns(returnValue); });
 });
 ```
+
+
 #### resolve
 
 Params:
@@ -37,6 +39,8 @@ loadUser.then(function(user) {
   console.log(user);
 });
 ```
+
+
 #### reject
 
 Params:
@@ -51,6 +55,8 @@ loadUser.error(function(error) {
   console.log(error);
 });
 ```
+
+
 #### resolveAsync
 
 Params:
@@ -66,6 +72,8 @@ loadUser.then(function(user) {
   console.log(user);
 });
 ```
+
+
 #### rejectAsync
 
 Params:
@@ -81,12 +89,16 @@ loadUser.error(function(error) {
   console.log(error);
 });
 ```
+
+
 #### fakeAggregate
 
 Params:
 - *AggregateClass* { Function } - Constructor function (~Class) used for instantiation
 
 Creates an instance of the given aggregate class and injects a $emitDomainEvent stub into the instance.
+
+
 #### wiredAggregate
 
 Params:
@@ -116,6 +128,8 @@ aggregate = eventricTesting.wiredAggregate(Aggregate, domainEvents);
 aggregate.create(function() {});
 expect(aggregate.foo).to.equal('bar');
 ```
+
+
 #### wiredCommandHandler
 
 Params:
@@ -142,6 +156,8 @@ var doSomething = eventricTesting.wiredCommandHandler(handlers.DoSomething);
 doSomething({id: 1234});
 expect(doSomething.$repository.findById).to.have.been.calledWith(1234);
 ```
+
+
 #### wiredQueryHandler
 
 Params:
@@ -167,6 +183,8 @@ var findSomething = eventricTesting.wiredQueryHandler(handlers.findSomething);
 findSomething({id: 1234});
 expect(findSomething.$repository.findById).to.have.been.calledWith(1234);
 ```
+
+
 #### wiredProjection
 
 Params:
@@ -194,6 +212,8 @@ projection.$emitDomainEvent('AggregateCreated', {});
 expect(projection.aggregateCount).to.equal(1);
 ```
 Note: This works for both normal projections and remote projections.
+
+
 #### repositoryStub
 
 
@@ -209,6 +229,8 @@ repository.save().then(function() {
   console.log('got saved');
 });
 ```
+
+
 #### wiredRemote
 
 Params:
@@ -246,28 +268,33 @@ wiredRemote.initializeProjectionInstance('RemoteProjection')
   expect(projection.actionLog.length).to.equal(3);
 });
 ```
+
+
 #### wiredDomainEventHandlers
 
 Params:
 - *domainEventHandlers* { Object } - Domain event handlers object
-- *domainEvents* { Object } - Domain event handlers object
+- *domainEvents* { Object } - Object of associated domainEvents with name as key and constructor as value
 
-Creates an object which is capable to emit domain
+Creates an object which is capable to emit domain events to itself and let the handler functions handle them.
 
 Example:
 ```javascript
+var domainEvents = {
+  SomethingCreated: function() {}
+};
 var handlers = {
-  findSomething: function(params) {
-    this.$repository('Aggregate').findById(params.id)
-    .then(function(aggregate) {
-      return aggregate;
-    });
+  SomethingCreated: function(domainEvent) {
+    ...
   }
 };
-var findSomething = eventricTesting.wiredQueryHandler(handlers.findSomething);
-findSomething({id: 1234});
-expect(findSomething.$repository.findById).to.have.been.calledWith(1234);
+var wiredHandlers = eventricTesting.wiredDomainEventHandlers(handlers);
+sandbox.stub(wiredHandlers, 'SomethingCreated');
+wiredHandlers.$emitDomainEvent('SomethingCreated', {});
+expect(wiredHandlers.SomethingCreated).to.have.been.called();
 ```
+
+
 #### projectionStoreMongoDbStub
 
 
@@ -282,6 +309,8 @@ projectionStore.upsert().then(function() {
   console.log('got saved');
 });
 ```
+
+
 #### createDomainEvent
 
 Params:
@@ -300,6 +329,8 @@ var SomethingHappened = function(params) {
 }
 var domainEvent = eventricTesting.createDomainEvent('example', 'SomethingHappened', SomethingHappened, '1234', {foo: 'bar'});
 ```
+
+
 
 
 ## License
