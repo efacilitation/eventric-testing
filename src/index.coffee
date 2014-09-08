@@ -44,7 +44,7 @@ eventric.testing =
   *
   * Example:
   * ```javascript
-  * var loadUser = eventricTesting.resolve({username: 'John Doe});
+  * var loadUser = eventricTesting.resolve({username: 'John Doe'});
   * loadUser.then(function(user) {
   *   console.log(user);
   * });
@@ -85,7 +85,7 @@ eventric.testing =
   *
   * Example:
   * ```javascript
-  * var loadUser = eventricTesting.resolveAsync({username: 'John Doe});
+  * var loadUser = eventricTesting.resolveAsync({username: 'John Doe'});
   * loadUser.then(function(user) {
   *   console.log(user);
   * });

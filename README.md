@@ -1,6 +1,6 @@
 ![eventric logo](https://raw.githubusercontent.com/wiki/efacilitation/eventric/eventric_logo.png)
 
-## eventric-testing [![Build Status](https://travis-ci.org/efacilitation/eventric-testing.svg?branch=master)](https://travis-ci.org/efacilitation/eventric-testing)
+## eventric-testing
 
 Testing is important. This library supports you in writing unit tests and feature specs more easily.
 
@@ -9,7 +9,7 @@ Testing is important. This library supports you in writing unit tests and featur
 
 
 
-#### setStubMethods
+#### setStubMethods()
 
 Params:
 - *stubMethod* { Function } - Factory method for creating stubs
@@ -25,7 +25,7 @@ beforeEach(function() {
 ```
 
 
-#### resolve
+#### resolve()
 
 Params:
 - *arguments* { * } - List of arguments which are passed to the success handler
@@ -34,14 +34,14 @@ Returns a promise like object which synchronously executes the success handler p
 
 Example:
 ```javascript
-var loadUser = eventricTesting.resolve({username: 'John Doe});
+var loadUser = eventricTesting.resolve({username: 'John Doe'});
 loadUser.then(function(user) {
   console.log(user);
 });
 ```
 
 
-#### reject
+#### reject()
 
 Params:
 - *arguments* { * } - List of arguments which are passed to the error handler
@@ -57,7 +57,7 @@ loadUser.error(function(error) {
 ```
 
 
-#### resolveAsync
+#### resolveAsync()
 
 Params:
 - *arguments* { * } - List of arguments which are passed to the success handler
@@ -67,14 +67,14 @@ The execution of the success handler is scheduled via setTimeout(fn, 0);
 
 Example:
 ```javascript
-var loadUser = eventricTesting.resolveAsync({username: 'John Doe});
+var loadUser = eventricTesting.resolveAsync({username: 'John Doe'});
 loadUser.then(function(user) {
   console.log(user);
 });
 ```
 
 
-#### rejectAsync
+#### rejectAsync()
 
 Params:
 - *arguments* { * } - List of arguments which are passed to the error handler
@@ -91,7 +91,7 @@ loadUser.error(function(error) {
 ```
 
 
-#### fakeAggregate
+#### fakeAggregate()
 
 Params:
 - *AggregateClass* { Function } - Constructor function (~Class) used for instantiation
@@ -99,7 +99,7 @@ Params:
 Creates an instance of the given aggregate class and injects a $emitDomainEvent stub into the instance.
 
 
-#### wiredAggregate
+#### wiredAggregate()
 
 Params:
 - *AggregateClass* { Function } - Constructor function (~Class) used for aggregate instantiation
@@ -130,7 +130,7 @@ expect(aggregate.foo).to.equal('bar');
 ```
 
 
-#### wiredCommandHandler
+#### wiredCommandHandler()
 
 Params:
 - *commandHandler* { Function } - Command handler function
@@ -158,7 +158,7 @@ expect(doSomething.$repository.findById).to.have.been.calledWith(1234);
 ```
 
 
-#### wiredQueryHandler
+#### wiredQueryHandler()
 
 Params:
 - *queryHandler* { Function } - Query handler function
@@ -185,7 +185,7 @@ expect(findSomething.$repository.findById).to.have.been.calledWith(1234);
 ```
 
 
-#### wiredProjection
+#### wiredProjection()
 
 Params:
 - *ProjectionClass* { Function } - Constructor function (~Class) used for instantiation
@@ -214,7 +214,7 @@ expect(projection.aggregateCount).to.equal(1);
 Note: This works for both normal projections and remote projections.
 
 
-#### repositoryStub
+#### repositoryStub()
 
 
 
@@ -231,7 +231,7 @@ repository.save().then(function() {
 ```
 
 
-#### wiredRemote
+#### wiredRemote()
 
 Params:
 - *contextName* { String } - Name of the context the remote is used for
@@ -270,7 +270,7 @@ wiredRemote.initializeProjectionInstance('RemoteProjection')
 ```
 
 
-#### wiredDomainEventHandlers
+#### wiredDomainEventHandlers()
 
 Params:
 - *domainEventHandlers* { Object } - Domain event handlers object
@@ -295,7 +295,7 @@ expect(wiredHandlers.SomethingCreated).to.have.been.called();
 ```
 
 
-#### projectionStoreMongoDbStub
+#### projectionStoreMongoDbStub()
 
 
 
@@ -311,7 +311,7 @@ projectionStore.upsert().then(function() {
 ```
 
 
-#### createDomainEvent
+#### createDomainEvent()
 
 Params:
 - *contextName* { String } - Name of context the event lives in
