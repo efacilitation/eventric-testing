@@ -3,8 +3,9 @@ describe 'remote factory', ->
   remoteFactory = require './remote_factory'
 
   class ExampleProjection
-    initialize: (params) ->
+    initialize: (params, done) ->
       @$subscribeHandlersWithAggregateId params.aggregateId
+      done()
 
 
     handleExampleCreated: (domainEvent) ->
@@ -69,8 +70,7 @@ describe 'remote factory', ->
       wiredRemote.initializeProjectionInstance 'ExampleProjection',
         aggregateId: 123
       .then (projectionId) ->
-        projection = wiredRemote.getProjectionInstance projectionId
-        projection.eventBus.subscribe 'changed', ->
-          expect(projection.projectedCreated).to.be.true
+        wiredRemote.subscribe 'projection:ExampleProjection:changed', (event) ->
+          expect(event.projection.projectedCreated).to.be.true
           done()
         wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
