@@ -37,6 +37,8 @@ class RemoteFactory
       names = [names] unless names instanceof Array
       then: (callback) =>
         callback @_domainEvents.filter (x) -> names.indexOf(x.name) > -1
+      catch: (callback) ->
+        callback()
 
 
     wiredRemote.findDomainEventsByNameAndAggregateId = (names, aggregateIds) ->
@@ -45,6 +47,8 @@ class RemoteFactory
       then: (callback) =>
         callback @_domainEvents.filter (x) ->
           names.indexOf(x.name) > -1 and x.aggregate and aggregateIds.indexOf(x.aggregate.id) > -1
+      catch: (callback) ->
+        callback()
 
 
     wiredRemote
