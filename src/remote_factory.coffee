@@ -20,6 +20,7 @@ class RemoteFactory
 
     wiredRemote.$emitDomainEvent = (domainEventName, aggregateId, domainEventPayload) ->
       domainEvent = @_createDomainEvent domainEventName, aggregateId, domainEventPayload
+      remoteInMemory.endpoint.publish contextName, domainEvent
       remoteInMemory.endpoint.publish contextName, domainEvent.name, domainEvent
       if domainEvent.aggregate
         remoteInMemory.endpoint.publish contextName, domainEvent.name, domainEvent.aggregate.id, domainEvent

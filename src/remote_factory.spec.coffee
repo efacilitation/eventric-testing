@@ -55,6 +55,27 @@ describe 'remote factory', ->
 
   describe '#wiredRemote.$emitDomainEvent', ->
 
+    it 'should publish the DomainEvent with context', (done) ->
+      wiredRemote.subscribeToAllDomainEvents (domainEvent) ->
+        expect(domainEvent.payload.assignedCreated).to.be.ok
+        done()
+      wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+
+
+    it 'should publish the DomainEvent with context, eventName', (done) ->
+      wiredRemote.subscribeToDomainEvent 'ExampleCreated', (domainEvent) ->
+        expect(domainEvent.payload.assignedCreated).to.be.ok
+        done()
+      wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+
+
+    it 'should publish the DomainEvent with context, eventName, aggregateId', (done) ->
+      wiredRemote.subscribeToDomainEventWithAggregateId 'ExampleCreated', 123, (domainEvent) ->
+        expect(domainEvent.payload.assignedCreated).to.be.ok
+        done()
+      wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+
+
     it 'should populate the remote with the given event which is applied to later created projections', ->
       wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
       wiredRemote.addProjection 'ExampleProjection', ExampleProjection
