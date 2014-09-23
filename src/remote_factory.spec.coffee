@@ -27,6 +27,11 @@ describe 'remote factory', ->
   beforeEach ->
     wiredRemote = remoteFactory.wiredRemote 'context', domainEvents
 
+
+  afterEach ->
+    wiredRemote.$restore()
+
+
   describe '#wiredRemote', ->
 
     it 'should create a wired remote with helper functions', ->
@@ -95,3 +100,30 @@ describe 'remote factory', ->
           expect(event.projection.projectedCreated).to.be.true
           done()
         wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+
+
+  describe '#wiredRemote.$restore', ->
+
+    it 'should remove the stored domainEvents', ->
+      wiredRemote.$populateWithDomainEvent 'ExampleCreated', 123, emittedCreated: true
+      wiredRemote.$restore()
+      wiredRemote.addProjection 'ExampleProjection', ExampleProjection
+      wiredRemote.initializeProjectionInstance 'ExampleProjection',
+        aggregateId: 123
+      .then (projectionId) ->
+        projection = wiredRemote.getProjectionInstance projectionId
+        expect(projection.projectedCreated).not.to.be.ok
+
+
+    it 'should remove the added domainEvent handlers', (done) ->
+      domainEventHandler = sandbox.stub()
+      wiredRemote.subscribeToAllDomainEvents domainEventHandler
+      wiredRemote.subscribeToDomainEvent 'ExampleCreated', domainEventHandler
+      wiredRemote.subscribeToDomainEventWithAggregateId 'ExampleCreated', 123, domainEventHandler
+      wiredRemote.$restore()
+
+      wiredRemote.subscribeToDomainEvent 'ExampleCreated', (domainEvent) ->
+        expect(domainEventHandler).to.have.callCount 0
+        done()
+
+      wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true

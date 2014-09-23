@@ -11,6 +11,7 @@ class RemoteFactory
 
     wiredRemote = new Remote contextName
     wiredRemote._domainEvents = []
+    wiredRemote._subscriberIds = []
     wiredRemote.addClient 'inmemory', remoteInMemory.client
     wiredRemote.set 'default client', 'inmemory'
 
@@ -48,6 +49,34 @@ class RemoteFactory
         callback @_domainEvents.filter (x) ->
           names.indexOf(x.name) > -1 and x.aggregate and aggregateIds.indexOf(x.aggregate.id) > -1
       catch: ->
+
+
+    originalSubscribeToAllDomainEvents = wiredRemote.subscribeToAllDomainEvents
+    wiredRemote.subscribeToAllDomainEvents = ->
+      id = originalSubscribeToAllDomainEvents.apply @, arguments
+      @_subscriberIds.push id
+      id
+
+
+    originalSubscribeToDomainEvent = wiredRemote.subscribeToDomainEvent
+    wiredRemote.subscribeToDomainEvent = ->
+      id = originalSubscribeToDomainEvent.apply @, arguments
+      @_subscriberIds.push id
+      id
+
+
+    originalSubscribeToDomainEventWithAggregateId = wiredRemote.subscribeToDomainEventWithAggregateId
+    wiredRemote.subscribeToDomainEventWithAggregateId = ->
+      id = originalSubscribeToDomainEventWithAggregateId.apply @, arguments
+      @_subscriberIds.push id
+      id
+
+
+    wiredRemote.$restore = ->
+      @_domainEvents = []
+      for subscriberId in @_subscriberIds
+        wiredRemote.unsubscribeFromDomainEvent subscriberId
+      @_subscriberIds = []
 
 
     wiredRemote
