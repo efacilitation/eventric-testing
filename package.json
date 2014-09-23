@@ -1,5 +1,6 @@
 {
   "name": "eventric-testing",
+  "version": "0.0.15",
   "description": "Testing helpers for eventric.js",
   "url": "http://eventricjs.org",
   "keywords": [
@@ -22,7 +23,6 @@
     "eventric"
   ],
   "author": "eFa Team <team@efa-gmbh.com>",
-  "version": "0.0.14",
   "repository": {
     "type": "git",
     "url": "https://github.com/efacilitation/eventric-testing.git"
