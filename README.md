@@ -331,6 +331,21 @@ var domainEvent = eventricTesting.createDomainEvent('example', 'SomethingHappene
 ```
 
 
+#### restore
+
+
+
+Restores eventric to a clean state:
+- Removes all registered DomainEventHandlers from the contexts
+
+Example:
+```javascript
+afterEach(function() {
+  eventricTesting.restore()
+})
+```
+
+
 
 
 ## License
