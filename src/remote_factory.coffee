@@ -1,9 +1,11 @@
-eventric        = require 'eventric'
-Remote          = require 'eventric/src/remote'
-remoteInMemory  = require 'eventric/src/remote_inmemory'
+_                  = require 'lodash'
 
-domainEventFactory    = require './domain_event_factory'
-stubFactory           = require './stub_factory'
+eventric           = require 'eventric'
+Remote             = require 'eventric/src/remote'
+remoteInMemory     = require 'eventric/src/remote_inmemory'
+
+domainEventFactory = require './domain_event_factory'
+stubFactory        = require './stub_factory'
 
 class RemoteFactory
 
@@ -12,6 +14,7 @@ class RemoteFactory
     wiredRemote = new Remote contextName
     wiredRemote._domainEvents = []
     wiredRemote._subscriberIds = []
+    wiredRemote._commandStubs = []
     wiredRemote.addClient 'inmemory', remoteInMemory.client
     wiredRemote.set 'default client', 'inmemory'
 
@@ -77,6 +80,40 @@ class RemoteFactory
       for subscriberId in @_subscriberIds
         wiredRemote.unsubscribeFromDomainEvent subscriberId
       @_subscriberIds = []
+      @_commandStubs = []
+
+
+    wiredRemote.$onCommand = (command, payload) ->
+      commandStub =
+        command: command
+        payload: payload
+        domainEvents: []
+        yieldsDomainEvent: (eventName, aggregateId, payload) ->
+          @domainEvents.push
+            eventName: eventName
+            aggregateId: aggregateId
+            payload: payload
+          @
+
+      @_commandStubs.push commandStub
+      commandStub
+
+
+    originalCommand = wiredRemote.command
+    wiredRemote.command = (command, payload) ->
+      filteredCommandStubs = @_commandStubs.filter (commandStub) ->
+        return false unless command is commandStub.command
+        _.isEqual payload, commandStub.payload
+
+      unless filteredCommandStubs.length
+        originalCommand.apply @, arguments
+        return
+
+      for filteredCommandStub in filteredCommandStubs
+        for domainEvent in filteredCommandStub.domainEvents
+          @$emitDomainEvent domainEvent.eventName,
+            domainEvent.aggregateId,
+            domainEvent.payload
 
 
     wiredRemote

@@ -102,6 +102,25 @@ describe 'remote factory', ->
         wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
 
 
+  describe '#wiredRemote.$onCommand', ->
+
+    it 'should emit the	associated DomainEvent if a specific command is called', (done) ->
+      wiredRemote.$onCommand 'myCommand', myKey: 'myValue'
+        .yieldsDomainEvent 'ExampleCreated', 123,
+          emittedCreated: true
+        .yieldsDomainEvent 'ExampleModified', 123,
+          emittedModified: true
+
+      wiredRemote.subscribeToDomainEventWithAggregateId 'ExampleCreated', 123, (domainEvent) ->
+        expect(domainEvent.payload.assignedCreated).to.be.true
+
+      wiredRemote.subscribeToDomainEventWithAggregateId 'ExampleModified', 123, (domainEvent) ->
+        expect(domainEvent.payload.assignedModified).to.be.true
+        done()
+
+      wiredRemote.command 'myCommand', myKey: 'myValue'
+
+
   describe '#wiredRemote.$restore', ->
 
     it 'should remove the stored domainEvents', ->
@@ -127,3 +146,21 @@ describe 'remote factory', ->
         done()
 
       wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+
+
+    it 'should remove the added commandStubs', (done) ->
+      domainEventHandler = sandbox.stub()
+      wiredRemote.subscribeToDomainEventWithAggregateId 'ExampleCreated', 123, domainEventHandler
+      wiredRemote.$onCommand 'myCommand', myKey: 'myValue'
+        .yieldsDomainEvent 'ExampleCreated', 123,
+          emittedCreated: true
+
+      wiredRemote.$restore()
+
+      wiredRemote.subscribeToDomainEventWithAggregateId 'ExampleCreated', 123, (domainEvent) ->
+        expect(domainEventHandler).to.have.callCount 0
+        done()
+      wiredRemote.$onCommand 'myCommand', myKey: 'myValue'
+        .yieldsDomainEvent 'ExampleCreated', 123,
+          emittedCreated: true
+      wiredRemote.command 'myCommand', myKey: 'myValue'
