@@ -121,6 +121,23 @@ describe 'remote factory', ->
       wiredRemote.command 'myCommand', myKey: 'myValue'
 
 
+  describe '#wiredRemote.command', ->
+
+    it 'should delegate the command function if there is no commandStub registered', ->
+      wiredRemote.command 'myCustomCommand'
+      .catch (error) ->
+        expect(error.message).to.contain '_handleRPCRequest'
+
+
+    it 'should return a fake promise if a DomainEvent is emitted', ->
+      wiredRemote.$onCommand 'myCommand', myKey: 'myValue'
+        .yieldsDomainEvent 'ExampleCreated', 123,
+          emittedCreated: true
+      wiredRemote.command 'myCommand', myKey: 'myValue'
+      .then ->
+        expect(true).to.be.ok
+
+
   describe '#wiredRemote.$restore', ->
 
     it 'should remove the stored domainEvents', ->

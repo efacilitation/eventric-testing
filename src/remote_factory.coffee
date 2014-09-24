@@ -6,6 +6,7 @@ remoteInMemory     = require 'eventric/src/remote_inmemory'
 
 domainEventFactory = require './domain_event_factory'
 stubFactory        = require './stub_factory'
+fakePromise        = require './fake_promise'
 
 class RemoteFactory
 
@@ -106,8 +107,7 @@ class RemoteFactory
         _.isEqual payload, commandStub.payload
 
       unless filteredCommandStubs.length
-        originalCommand.apply @, arguments
-        return
+        return originalCommand.apply @, arguments
 
       for filteredCommandStub in filteredCommandStubs
         for domainEvent in filteredCommandStub.domainEvents
@@ -115,6 +115,7 @@ class RemoteFactory
             domainEvent.aggregateId,
             domainEvent.payload
 
+      fakePromise.resolve()
 
     wiredRemote
 
