@@ -21,7 +21,7 @@ class ProjectionFactory
     if projection.initialize
       projection.$subscribeHandlersWithAggregateId = (aggregateId) ->
         projection.__subscribedAggregateId = aggregateId
-      projection.initialize params
+      projection.initialize params, ->
 
 
   _wireProjection: (projection, domainEvents) ->
