@@ -126,7 +126,7 @@ describe 'remote factory', ->
     it 'should delegate the command function if there is no commandStub registered', ->
       wiredRemote.command 'myCustomCommand'
       .catch (error) ->
-        expect(error.message).to.contain '_handleRPCRequest'
+        expect(error).to.be.defined
 
 
     it 'should return a fake promise if a DomainEvent is emitted', ->
