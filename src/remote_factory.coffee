@@ -2,7 +2,7 @@ _                  = require 'lodash'
 
 eventric           = require 'eventric'
 Remote             = require 'eventric/src/remote'
-remoteInMemory     = require 'eventric/src/remote_inmemory'
+remoteInMemory     = require 'eventric/src/remote/inmemory'
 
 domainEventFactory = require './domain_event_factory'
 stubFactory        = require './stub_factory'

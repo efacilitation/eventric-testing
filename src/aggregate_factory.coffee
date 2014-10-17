@@ -1,4 +1,4 @@
-Aggregate = require 'eventric/src/aggregate'
+Aggregate = require 'eventric/src/context/aggregate'
 
 stubFactory = require './stub_factory'
 

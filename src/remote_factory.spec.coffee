@@ -148,36 +148,7 @@ describe 'remote factory', ->
         aggregateId: 123
       .then (projectionId) ->
         projection = wiredRemote.getProjectionInstance projectionId
-        expect(projection.projectedCreated).not.to.be.ok
-
-
-    it 'should remove the added domainEvent handlers', (done) ->
-      domainEventHandler = sandbox.stub()
-      wiredRemote.subscribeToAllDomainEvents domainEventHandler
-      wiredRemote.subscribeToDomainEvent 'ExampleCreated', domainEventHandler
-      wiredRemote.subscribeToDomainEventWithAggregateId 'ExampleCreated', 123, domainEventHandler
-      wiredRemote.$restore()
-
-      wiredRemote.subscribeToDomainEvent 'ExampleCreated', (domainEvent) ->
-        expect(domainEventHandler).to.have.callCount 0
-        done()
-
-      wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
-
-
-    it 'should remove the added commandStubs', (done) ->
-      domainEventHandler = sandbox.stub()
-      wiredRemote.subscribeToDomainEventWithAggregateId 'ExampleCreated', 123, domainEventHandler
-      wiredRemote.$onCommand 'myCommand', myKey: 'myValue'
-        .yieldsDomainEvent 'ExampleCreated', 123,
-          emittedCreated: true
-
-      wiredRemote.$restore()
-
-      wiredRemote.subscribeToDomainEventWithAggregateId 'ExampleCreated', 123, (domainEvent) ->
-        expect(domainEventHandler).to.have.callCount 0
-        done()
-      wiredRemote.$onCommand 'myCommand', myKey: 'myValue'
-        .yieldsDomainEvent 'ExampleCreated', 123,
-          emittedCreated: true
-      wiredRemote.command 'myCommand', myKey: 'myValue'
+        wiredRemote.subscribe 'projection:ExampleProjection:changed', ->
+          expect(projection.projectedCreated).to.be.true
+          done()
+        wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true

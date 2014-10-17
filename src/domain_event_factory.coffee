@@ -1,5 +1,5 @@
 eventric      = require 'eventric'
-DomainEvent   = require 'eventric/src/domain_event'
+DomainEvent   = require 'eventric/src/context/domain_event'
 
 class DomainEventFactory
 
