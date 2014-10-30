@@ -1,9 +1,13 @@
+_isPromise = (promise) ->
+  promise and typeof promise.then is 'function' and typeof promise.catch is 'function'
+
+
 class FakePromise
 
   resolve: (args...) ->
     then: (callback = ->) ->
-      callback.apply this, args
-      @
+      promise = callback.apply this, args
+      if _isPromise(promise) then promise else @
     catch: ->
       @
 
@@ -12,7 +16,8 @@ class FakePromise
     then: ->
       @
     catch: (callback = ->) ->
-      callback.apply this, args
+      promise = callback.apply this, args
+      if _isPromise(promise) then promise else @
       @
 
 

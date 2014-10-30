@@ -40,7 +40,7 @@ eventric.testing =
   *
   * @description
   *
-  * Returns a promise like object which synchronously executes the success handler provided via .then()
+  * Returns a promise like object which synchronously executes the success handler provided via .then(). If another promise is returned by the handler function, this promise will be returned.
   *
   * Example:
   * ```javascript
@@ -60,7 +60,7 @@ eventric.testing =
   *
   * @description
   *
-  * Returns a promise like object which synchronously executes the error handler provided via .catch()
+  * Returns a promise like object which synchronously executes the error handler provided via .catch(). If another promise is returned by the handler function, this promise will be returned.
   *
   * Example:
   * ```javascript

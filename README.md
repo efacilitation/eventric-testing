@@ -1,6 +1,6 @@
 ![eventric logo](https://raw.githubusercontent.com/wiki/efacilitation/eventric/eventric_logo.png)
 
-## eventric-testing
+## eventric-testing [![Build Status](https://travis-ci.org/efacilitation/eventric-testing.svg?branch=master)](https://travis-ci.org/efacilitation/eventric-testing)
 
 Testing is important. This library supports you in writing unit tests and feature specs more easily.
 
@@ -30,7 +30,7 @@ beforeEach(function() {
 Params:
 - *arguments* { * } - List of arguments which are passed to the success handler
 
-Returns a promise like object which synchronously executes the success handler provided via .then()
+Returns a promise like object which synchronously executes the success handler provided via .then(). If another promise is returned by the handler function, this promise will be returned.
 
 Example:
 ```javascript
@@ -46,7 +46,7 @@ loadUser.then(function(user) {
 Params:
 - *arguments* { * } - List of arguments which are passed to the error handler
 
-Returns a promise like object which synchronously executes the error handler provided via .catch()
+Returns a promise like object which synchronously executes the error handler provided via .catch(). If another promise is returned by the handler function, this promise will be returned.
 
 Example:
 ```javascript
@@ -331,7 +331,7 @@ var domainEvent = eventricTesting.createDomainEvent('example', 'SomethingHappene
 ```
 
 
-#### restore
+#### restore()
 
 
 
