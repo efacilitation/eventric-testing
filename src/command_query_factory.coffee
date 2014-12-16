@@ -15,12 +15,15 @@ class CommandQueryFactory
   _wireHandler: (handler) ->
     di =
       $adapter:         stubFactory.stub()
-      $aggregate:       stubFactory.stub()
+      $aggregate:
+        create:         stubFactory.stub()
+        load:           stubFactory.stub()
       $domainService:   stubFactory.stub()
       $query:           stubFactory.stub()
       $projectionStore: stubFactory.stub()
       $emitDomainEvent: stubFactory.stub()
-    stubFactory.configureReturnValue di.$aggregate, @aggregateStub()
+    stubFactory.configureReturnValue di.$aggregate.create, @aggregateStub()
+    stubFactory.configureReturnValue di.$aggregate.load, @aggregateStub()
     stubFactory.configureReturnValue di.$projectionStore, projectionFactory.mongoDbStoreStub()
     handler = handler.bind di
     for key of di
@@ -29,13 +32,10 @@ class CommandQueryFactory
 
 
   aggregateStub: ->
-    loadStub = stubFactory.stub()
-    createStub = stubFactory.stub()
-    stubFactory.configureReturnValue loadStub, fakePromise.resolve()
-    stubFactory.configureReturnValue createStub, fakePromise.resolve()
+    saveStub = stubFactory.stub()
+    stubFactory.configureReturnValue saveStub, fakePromise.resolve()
     return {
-      load: loadStub
-      create: createStub
+      $save: saveStub
     }
 
 

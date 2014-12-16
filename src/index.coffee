@@ -261,24 +261,24 @@ eventric.testing =
 
 
   ###*
-  * @name repositoryStub
+  * @name aggregateStub
   *
   * @description
   *
-  * Creates a stubbed version of a repository.
-  * The stubbed functions are: findById(), create() and save().
+  * Creates a stubbed version of a aggregate.
+  * The stubbed functions are: create() and load().
   * All of them return a synchronously resolving promise like object.
   *
   * Example:
   * ```javascript
-  * var repository = eventricTesting.repositoryStub()
-  * repository.save().then(function() {
+  * var aggregate = eventricTesting.aggregateStub()
+  * aggregate.save().then(function() {
   *   console.log('got saved');
   * });
   * ```
   ###
-  repositoryStub: (args...) ->
-    commandQueryFactory.repositoryStub args...
+  aggregateStub: (args...) ->
+    commandQueryFactory.aggregateStub args...
 
 
   ###*
