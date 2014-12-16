@@ -14,8 +14,8 @@ describe 'command/query factory', ->
       commandHandler = ->
         expect(@$adapter).to.be.a 'function'
         expect(@$adapter).to.equal wiredCommandHandler.$adapter
-        expect(@$repository).to.be.a 'function'
-        expect(@$repository).to.equal wiredCommandHandler.$repository
+        expect(@$aggregate).to.be.a 'function'
+        expect(@$aggregate).to.equal wiredCommandHandler.$aggregate
         expect(@$domainService).to.be.a 'function'
         expect(@$domainService).to.equal wiredCommandHandler.$domainService
         expect(@$query).to.be.a 'function'
@@ -34,8 +34,8 @@ describe 'command/query factory', ->
       queryHandler = ->
         expect(@$adapter).to.be.a 'function'
         expect(@$adapter).to.equal wiredQueryHandler.$adapter
-        expect(@$repository).to.be.a 'function'
-        expect(@$repository).to.equal wiredQueryHandler.$repository
+        expect(@$aggregate).to.be.a 'function'
+        expect(@$aggregate).to.equal wiredQueryHandler.$aggregate
         expect(@$domainService).to.be.a 'function'
         expect(@$domainService).to.equal wiredQueryHandler.$domainService
         expect(@$query).to.be.a 'function'

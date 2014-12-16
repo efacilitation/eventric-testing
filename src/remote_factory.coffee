@@ -1,9 +1,5 @@
 _                  = require 'lodash'
-
 eventric           = require 'eventric'
-Remote             = require 'eventric/src/remote'
-remoteInMemory     = require 'eventric/src/remote/inmemory'
-
 domainEventFactory = require './domain_event_factory'
 stubFactory        = require './stub_factory'
 fakePromise        = require './fake_promise'
@@ -11,12 +7,13 @@ fakePromise        = require './fake_promise'
 class RemoteFactory
 
   wiredRemote: (contextName, domainEvents) ->
-
-    wiredRemote = new Remote contextName
+    pubsub = new eventric.PubSub
+    wiredRemote = new eventric.Remote contextName, eventric
+    eventric.mixin wiredRemote, pubsub
     wiredRemote._domainEvents = []
     wiredRemote._subscriberIds = []
     wiredRemote._commandStubs = []
-    wiredRemote.addClient 'inmemory', remoteInMemory.client
+    wiredRemote.addClient 'inmemory', eventric.RemoteInMemory.client
     wiredRemote.set 'default client', 'inmemory'
 
     wiredRemote.$populateWithDomainEvent = (domainEventName, aggregateId, domainEventPayload) ->
@@ -25,10 +22,10 @@ class RemoteFactory
 
     wiredRemote.$emitDomainEvent = (domainEventName, aggregateId, domainEventPayload) ->
       domainEvent = @_createDomainEvent domainEventName, aggregateId, domainEventPayload
-      remoteInMemory.endpoint.publish contextName, domainEvent
-      remoteInMemory.endpoint.publish contextName, domainEvent.name, domainEvent
+      eventric.RemoteInMemory.endpoint.publish contextName, domainEvent
+      eventric.RemoteInMemory.endpoint.publish contextName, domainEvent.name, domainEvent
       if domainEvent.aggregate
-        remoteInMemory.endpoint.publish contextName, domainEvent.name, domainEvent.aggregate.id, domainEvent
+        eventric.RemoteInMemory.endpoint.publish contextName, domainEvent.name, domainEvent.aggregate.id, domainEvent
       @_domainEvents.push domainEvent
 
 

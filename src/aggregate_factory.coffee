@@ -1,4 +1,5 @@
-Aggregate = require 'eventric/src/context/aggregate'
+eventric  = require 'eventric'
+Aggregate = eventric.Aggregate
 
 stubFactory = require './stub_factory'
 
@@ -17,7 +18,7 @@ class AggregateFactory
 
   instantiateAggregateWithFakeContext: (AggregateClass, domainEvents) ->
     fakeContext = @_createFakeContext domainEvents
-    new Aggregate fakeContext, 'Aggregate', AggregateClass
+    new Aggregate fakeContext, eventric, 'Aggregate', AggregateClass
 
 
   _createFakeContext: (domainEvents) ->

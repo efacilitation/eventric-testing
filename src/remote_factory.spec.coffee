@@ -58,7 +58,7 @@ describe 'remote factory', ->
       expect(-> wiredRemote.populateWithDomainEvent 'Foobar').to.throw Error
 
 
-  describe '#wiredRemote.$emitDomainEvent', ->
+  describe.skip '#wiredRemote.$emitDomainEvent', ->
 
     it 'should publish the DomainEvent with context', (done) ->
       wiredRemote.subscribeToAllDomainEvents (domainEvent) ->
