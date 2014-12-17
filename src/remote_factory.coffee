@@ -7,9 +7,7 @@ fakePromise        = require './fake_promise'
 class RemoteFactory
 
   wiredRemote: (contextName, domainEvents) ->
-    pubsub = new eventric.PubSub
-    wiredRemote = new eventric.Remote contextName, eventric
-    eventric.mixin wiredRemote, pubsub
+    wiredRemote = eventric.remote contextName
     wiredRemote._domainEvents = []
     wiredRemote._subscriberIds = []
     wiredRemote._commandStubs = []
@@ -54,23 +52,26 @@ class RemoteFactory
 
     originalSubscribeToAllDomainEvents = wiredRemote.subscribeToAllDomainEvents
     wiredRemote.subscribeToAllDomainEvents = ->
-      id = originalSubscribeToAllDomainEvents.apply @, arguments
-      @_subscriberIds.push id
-      id
+      originalSubscribeToAllDomainEvents.apply @, arguments
+      .then (subscriberId) =>
+        @_subscriberIds.push subscriberId
+        subscriberId
 
 
     originalSubscribeToDomainEvent = wiredRemote.subscribeToDomainEvent
     wiredRemote.subscribeToDomainEvent = ->
-      id = originalSubscribeToDomainEvent.apply @, arguments
-      @_subscriberIds.push id
-      id
+      originalSubscribeToDomainEvent.apply @, arguments
+      .then (subscriberId) =>
+        @_subscriberIds.push subscriberId
+        subscriberId
 
 
     originalSubscribeToDomainEventWithAggregateId = wiredRemote.subscribeToDomainEventWithAggregateId
     wiredRemote.subscribeToDomainEventWithAggregateId = ->
-      id = originalSubscribeToDomainEventWithAggregateId.apply @, arguments
-      @_subscriberIds.push id
-      id
+      originalSubscribeToDomainEventWithAggregateId.apply @, arguments
+      .then (subscriberId) =>
+        @_subscriberIds.push subscriberId
+        subscriberId
 
 
     wiredRemote.$restore = ->
