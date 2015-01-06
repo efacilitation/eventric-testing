@@ -76,10 +76,12 @@ class RemoteFactory
 
     wiredRemote.$restore = ->
       @_domainEvents = []
-      for subscriberId in @_subscriberIds
-        wiredRemote.unsubscribeFromDomainEvent subscriberId
-      @_subscriberIds = []
       @_commandStubs = []
+      subscriptionRemovals = []
+      for subscriberId in @_subscriberIds
+        subscriptionRemovals.push wiredRemote.unsubscribeFromDomainEvent subscriberId
+      @_subscriberIds = []
+      Promise.all subscriptionRemovals
 
 
     wiredRemote.$onCommand = (command, payload) ->

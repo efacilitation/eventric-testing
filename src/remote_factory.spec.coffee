@@ -123,13 +123,13 @@ describe 'remote factory', ->
 
   describe '#wiredRemote.command', ->
 
-    it 'should delegate the command function if there is no commandStub registered', ->
+    it 'should delegate the command function if there is no command stub registered', ->
       wiredRemote.command 'myCustomCommand'
       .catch (error) ->
         expect(error).to.be.defined
 
 
-    it 'should return a fake promise if a DomainEvent is emitted', ->
+    it 'should return a fake promise if a domain event is emitted', ->
       wiredRemote.$onCommand 'myCommand', myKey: 'myValue'
         .yieldsDomainEvent 'ExampleCreated', 123,
           emittedCreated: true
@@ -140,27 +140,43 @@ describe 'remote factory', ->
 
   describe '#wiredRemote.$restore', ->
 
-    class CountingProjection
+    class ExampleReportingProjection
       initialize: (params, done) ->
-        @counter = 0
+        @exampleCount = 0
         @$subscribeHandlersWithAggregateId params.aggregateId
         done()
 
       handleExampleCreated: () ->
-        @counter++
+        @exampleCount++
 
 
     it 'should remove the stored domain events', (done) ->
       wiredRemote.$populateWithDomainEvent 'ExampleCreated', 123, emittedCreated: true
       wiredRemote.$restore()
-      wiredRemote.addProjection 'CountingProjection', CountingProjection
-      wiredRemote.initializeProjectionInstance 'CountingProjection',
+      wiredRemote.addProjection 'ExampleReportingProjection', ExampleReportingProjection
+      wiredRemote.initializeProjectionInstance 'ExampleReportingProjection',
         aggregateId: 123
       .then (projectionId) ->
         projection = wiredRemote.getProjectionInstance projectionId
-        wiredRemote.subscribe 'projection:CountingProjection:changed', ->
-          expect(projection.counter).to.equal 1
+        wiredRemote.subscribe 'projection:ExampleReportingProjection:changed', ->
+          expect(projection.exampleCount).to.equal 1
           done()
         wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
 
+
+    it 'should unsubscribe all subscribers', (done) ->
+      domainEventHandler = sandbox.spy()
+      wiredRemote.subscribeToDomainEvent 'ExampleCreated', domainEventHandler
+      .then ->
+        wiredRemote.subscribeToDomainEvent 'ExampleCreated', domainEventHandler
+      .then ->
+        wiredRemote.subscribeToDomainEvent 'ExampleCreated', domainEventHandler
+      .then ->
+        wiredRemote.$restore()
+      .then ->
+        wiredRemote.subscribeToDomainEvent 'ExampleCreated', domainEventHandler
+        wiredRemote.subscribeToDomainEvent 'ExampleCreated', ->
+          expect(domainEventHandler.callCount).to.equal 1
+          done()
+        wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
 
