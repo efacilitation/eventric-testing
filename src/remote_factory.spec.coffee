@@ -140,15 +140,27 @@ describe 'remote factory', ->
 
   describe '#wiredRemote.$restore', ->
 
-    it 'should remove the stored domainEvents', ->
+    class CountingProjection
+      initialize: (params, done) ->
+        @counter = 0
+        @$subscribeHandlersWithAggregateId params.aggregateId
+        done()
+
+      handleExampleCreated: () ->
+        @counter++
+
+
+    it 'should remove the stored domain events', (done) ->
       wiredRemote.$populateWithDomainEvent 'ExampleCreated', 123, emittedCreated: true
       wiredRemote.$restore()
-      wiredRemote.addProjection 'ExampleProjection', ExampleProjection
-      wiredRemote.initializeProjectionInstance 'ExampleProjection',
+      wiredRemote.addProjection 'CountingProjection', CountingProjection
+      wiredRemote.initializeProjectionInstance 'CountingProjection',
         aggregateId: 123
       .then (projectionId) ->
         projection = wiredRemote.getProjectionInstance projectionId
-        wiredRemote.subscribe 'projection:ExampleProjection:changed', ->
-          expect(projection.projectedCreated).to.be.true
+        wiredRemote.subscribe 'projection:CountingProjection:changed', ->
+          expect(projection.counter).to.equal 1
           done()
         wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+
+
