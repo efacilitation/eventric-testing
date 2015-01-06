@@ -2,7 +2,8 @@
 
 ## eventric-testing [![Build Status](https://travis-ci.org/efacilitation/eventric-testing.svg?branch=master)](https://travis-ci.org/efacilitation/eventric-testing)
 
-Testing is important. This library supports you in writing unit tests and feature specs more easily.
+This library supports you in writing (feature) specs for [eventric.js](https://github.com/efacilitation/eventric)
+based applications more easily.
 
 
 ### API

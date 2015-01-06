@@ -2,7 +2,8 @@
 
 ## eventric-testing [![Build Status](https://travis-ci.org/efacilitation/eventric-testing.svg?branch=master)](https://travis-ci.org/efacilitation/eventric-testing)
 
-Testing is important. This library supports you in writing unit tests and feature specs more easily.
+This library supports you in writing (feature) specs for [eventric.js](https://github.com/efacilitation/eventric)
+based applications more easily.
 
 
 ### API
@@ -214,18 +215,18 @@ expect(projection.aggregateCount).to.equal(1);
 Note: This works for both normal projections and remote projections.
 
 
-#### repositoryStub()
+#### aggregateStub()
 
 
 
-Creates a stubbed version of a repository.
-The stubbed functions are: findById(), create() and save().
+Creates a stubbed version of a aggregate.
+The stubbed functions are: create() and load().
 All of them return a synchronously resolving promise like object.
 
 Example:
 ```javascript
-var repository = eventricTesting.repositoryStub()
-repository.save().then(function() {
+var aggregate = eventricTesting.aggregateStub()
+aggregate.save().then(function() {
   console.log('got saved');
 });
 ```
