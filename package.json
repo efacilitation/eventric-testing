@@ -58,11 +58,11 @@
     "run-sequence": "*",
     "sinon": "*",
     "sinon-chai": "*",
-    "mockery": "*",
-    "lodash": "*"
+    "mockery": "*"
   },
   "dependencies": {
-    "eventric": "*"
+    "eventric": "*",
+    "lodash": "*"
   },
   "licenses": [
     {
