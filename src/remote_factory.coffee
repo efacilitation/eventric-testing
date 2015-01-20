@@ -36,18 +36,15 @@ class RemoteFactory
 
     wiredRemote.findDomainEventsByName = (names) ->
       names = [names] unless names instanceof Array
-      then: (callback) =>
-        callback @_domainEvents.filter (x) -> names.indexOf(x.name) > -1
-      catch: ->
+      fakePromise.resolve @_domainEvents.filter (x) ->
+        names.indexOf(x.name) > -1
 
 
     wiredRemote.findDomainEventsByNameAndAggregateId = (names, aggregateIds) ->
       names = [names] unless names instanceof Array
       aggregateIds = [aggregateIds] unless aggregateIds instanceof Array
-      then: (callback) =>
-        callback @_domainEvents.filter (x) ->
-          names.indexOf(x.name) > -1 and x.aggregate and aggregateIds.indexOf(x.aggregate.id) > -1
-      catch: ->
+      fakePromise.resolve @_domainEvents.filter (x) ->
+        names.indexOf(x.name) > -1 and x.aggregate and aggregateIds.indexOf(x.aggregate.id) > -1
 
 
     originalSubscribeToAllDomainEvents = wiredRemote.subscribeToAllDomainEvents

@@ -179,4 +179,3 @@ describe 'remote factory', ->
           expect(domainEventHandler.callCount).to.equal 1
           done()
         wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
-
