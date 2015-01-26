@@ -8,7 +8,7 @@ class RemoteFactory
 
   wiredRemote: (contextName, domainEvents) ->
     wiredRemote = eventric.remote contextName
-    wiredRemote._lastEmitDomainEventOperation = fakePromise.resolve()
+    wiredRemote._mostCurrentEmitOperation = fakePromise.resolve()
     wiredRemote._domainEvents = []
     wiredRemote._subscriberIds = []
     wiredRemote._commandStubs = []
@@ -23,7 +23,7 @@ class RemoteFactory
       domainEvent = @_createDomainEvent domainEventName, aggregateId, domainEventPayload
       @_domainEvents.push domainEvent
       endpoint = eventric.RemoteInMemory.endpoint
-      @_lastEmitDomainEventOperation = @_lastEmitDomainEventOperation.then ->
+      @_mostCurrentEmitOperation = @_mostCurrentEmitOperation.then ->
         contextEventPublish = endpoint.publish contextName, domainEvent
         contextAndNameEventPublish = endpoint.publish contextName, domainEvent.name, domainEvent
         if domainEvent.aggregate
@@ -31,6 +31,10 @@ class RemoteFactory
           Promise.all([contextEventPublish, contextAndNameEventPublish, fullEventNamePublish])
         else
           Promise.all([contextEventPublish, contextAndNameEventPublish])
+
+
+    wiredRemote.$waitForEmitDomainEvent = =>
+      wiredRemote._mostCurrentEmitOperation
 
 
     wiredRemote._createDomainEvent = (domainEventName, aggregateId, domainEventPayload) ->
@@ -77,14 +81,17 @@ class RemoteFactory
         subscriberId
 
 
-    wiredRemote.$restore = ->
+    wiredRemote.$destroy = ->
       @_domainEvents = []
       @_commandStubs = []
-      subscriptionRemovals = []
-      for subscriberId in @_subscriberIds
-        subscriptionRemovals.push wiredRemote.unsubscribeFromDomainEvent subscriberId
-      @_subscriberIds = []
-      Promise.all subscriptionRemovals
+      @_mostCurrentEmitOperation.then =>
+        @_mostCurrentEmitOperation = fakePromise.resolve()
+        subscriptionRemovals = []
+        for subscriberId in @_subscriberIds
+          subscriptionRemovals.push wiredRemote.unsubscribeFromDomainEvent subscriberId
+        @_subscriberIds = []
+        Promise.all subscriptionRemovals
+
 
 
     wiredRemote.$onCommand = (command, payload) ->

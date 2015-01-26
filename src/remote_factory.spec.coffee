@@ -29,7 +29,7 @@ describe 'remote factory', ->
 
 
   afterEach ->
-    wiredRemote.$restore()
+    wiredRemote.$destroy()
 
 
   describe '#wiredRemote', ->
@@ -187,7 +187,18 @@ describe 'remote factory', ->
         expect(true).to.be.ok
 
 
-  describe '#wiredRemote.$restore', ->
+  describe.only '#wiredRemote.$waitForEmitDomainEvent', ->
+
+    it 'should wait until the most current emit domain event operation is finished', ->
+      domainEventHandlerSpy = sandbox.spy()
+      wiredRemote.subscribeToDomainEvent 'ExampleCreated', domainEventHandlerSpy
+      wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+      wiredRemote.$waitForEmitDomainEvent().then ->
+        expect(domainEventHandlerSpy).to.have.been.called
+
+
+
+  describe '#wiredRemote.$destroy', ->
 
     class ExampleReportingProjection
       initialize: (params, done) ->
@@ -201,7 +212,7 @@ describe 'remote factory', ->
 
     it 'should remove the stored domain events', (done) ->
       wiredRemote.$populateWithDomainEvent 'ExampleCreated', 123, emittedCreated: true
-      wiredRemote.$restore()
+      wiredRemote.$destroy()
       wiredRemote.addProjection 'ExampleReportingProjection', ExampleReportingProjection
       wiredRemote.initializeProjectionInstance 'ExampleReportingProjection',
         aggregateId: 123
@@ -221,10 +232,19 @@ describe 'remote factory', ->
       .then ->
         wiredRemote.subscribeToDomainEvent 'ExampleCreated', domainEventHandler
       .then ->
-        wiredRemote.$restore()
+        wiredRemote.$destroy()
       .then ->
         wiredRemote.subscribeToDomainEvent 'ExampleCreated', domainEventHandler
         wiredRemote.subscribeToDomainEvent 'ExampleCreated', ->
           expect(domainEventHandler.callCount).to.equal 1
           done()
         wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+
+
+    it 'should wait until the most current emit domain event operation is finished', ->
+      domainEventHandlerSpy = sandbox.spy()
+      wiredRemote.subscribeToDomainEvent 'ExampleCreated', domainEventHandlerSpy
+      wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+      wiredRemote.$destroy().then ->
+        expect(domainEventHandlerSpy).to.have.been.called
+

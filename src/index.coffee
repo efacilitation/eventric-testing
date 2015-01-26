@@ -9,7 +9,7 @@ domainEventHandlersFactory  = require './domain_event_handlers_factory'
 remoteFactory               = require './remote_factory'
 domainEventFactory          = require './domain_event_factory'
 
-objectsToRestore = []
+wiredRemotes = []
 
 eventric.testing =
 
@@ -322,7 +322,7 @@ eventric.testing =
   ###
   wiredRemote: (args...) ->
     wiredRemote = remoteFactory.wiredRemote args...
-    objectsToRestore.push wiredRemote
+    wiredRemotes.push wiredRemote
     wiredRemote
 
 
@@ -399,11 +399,10 @@ eventric.testing =
 
 
   ###*
-  * @name restore
+  * @name destroy
   * @description
   *
-  * Restores eventric to a clean state:
-  * - Removes all registered DomainEventHandlers from the contexts
+  * Destroys all wired remotes and removes all registered DomainEventHandlers from the contexts
   *
   * Example:
   * ```javascript
@@ -413,10 +412,10 @@ eventric.testing =
   * ```
   ###
 
-  restore: ->
-    for objectToRestore in objectsToRestore
-      objectToRestore.$restore()
-    objectsToRestore = []
+  destroy: ->
+    for wiredRemote in wiredRemotes
+      wiredRemote.$destroy()
+    wiredRemotes = []
 
 
 module.exports = eventric.testing

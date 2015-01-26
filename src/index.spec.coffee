@@ -7,8 +7,8 @@ describe 'eventricTesting', ->
 
   describe '#restore', ->
 
-    it 'should restore all objectsToRestore', ->
+    it 'should destroy all wired remotes', ->
       wiredRemote  = eventricTesting.wiredRemote 'context'
-      sandbox.spy wiredRemote, '$restore'
-      eventricTesting.restore()
-      expect(wiredRemote.$restore).to.have.been.calledOnce
+      sandbox.spy wiredRemote, '$destroy'
+      eventricTesting.destroy()
+      expect(wiredRemote.$destroy).to.have.been.calledOnce
