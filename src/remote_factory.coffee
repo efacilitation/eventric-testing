@@ -8,6 +8,7 @@ class RemoteFactory
 
   wiredRemote: (contextName, domainEvents) ->
     wiredRemote = eventric.remote contextName
+    wiredRemote._lastEmitDomainEventOperation = fakePromise.resolve()
     wiredRemote._domainEvents = []
     wiredRemote._subscriberIds = []
     wiredRemote._commandStubs = []
@@ -20,11 +21,16 @@ class RemoteFactory
 
     wiredRemote.$emitDomainEvent = (domainEventName, aggregateId, domainEventPayload) ->
       domainEvent = @_createDomainEvent domainEventName, aggregateId, domainEventPayload
-      eventric.RemoteInMemory.endpoint.publish contextName, domainEvent
-      eventric.RemoteInMemory.endpoint.publish contextName, domainEvent.name, domainEvent
-      if domainEvent.aggregate
-        eventric.RemoteInMemory.endpoint.publish contextName, domainEvent.name, domainEvent.aggregate.id, domainEvent
       @_domainEvents.push domainEvent
+      endpoint = eventric.RemoteInMemory.endpoint
+      @_lastEmitDomainEventOperation = @_lastEmitDomainEventOperation.then ->
+        contextEventPublish = endpoint.publish contextName, domainEvent
+        contextAndNameEventPublish = endpoint.publish contextName, domainEvent.name, domainEvent
+        if domainEvent.aggregate
+          fullEventNamePublish = endpoint.publish contextName, domainEvent.name, domainEvent.aggregate.id, domainEvent
+          Promise.all([contextEventPublish, contextAndNameEventPublish, fullEventNamePublish])
+        else
+          Promise.all([contextEventPublish, contextAndNameEventPublish])
 
 
     wiredRemote._createDomainEvent = (domainEventName, aggregateId, domainEventPayload) ->

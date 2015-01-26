@@ -60,46 +60,95 @@ describe 'remote factory', ->
 
   describe '#wiredRemote.$emitDomainEvent', ->
 
-    it 'should publish the DomainEvent with context', (done) ->
-      wiredRemote.subscribeToAllDomainEvents (domainEvent) ->
-        expect(domainEvent.payload.assignedCreated).to.be.ok
-        done()
-      wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+    describe 'emitting one event', ->
 
-
-    it 'should publish the DomainEvent with context, eventName', (done) ->
-      wiredRemote.subscribeToDomainEvent 'ExampleCreated', (domainEvent) ->
-        expect(domainEvent.payload.assignedCreated).to.be.ok
-        done()
-      wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
-
-
-    it 'should publish the DomainEvent with context, eventName, aggregateId', (done) ->
-      wiredRemote.subscribeToDomainEventWithAggregateId 'ExampleCreated', 123, (domainEvent) ->
-        expect(domainEvent.payload.assignedCreated).to.be.ok
-        done()
-      wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
-
-
-    it 'should populate the remote with the given event which is applied to later created projections', ->
-      wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
-      wiredRemote.addProjection 'ExampleProjection', ExampleProjection
-      wiredRemote.initializeProjectionInstance 'ExampleProjection',
-        aggregateId: 123
-      .then (projectionId) ->
-        projection = wiredRemote.getProjectionInstance projectionId
-        expect(projection.projectedCreated).to.be.true
-
-
-    it 'should publish the domain event so domain event subscribers are notified of it', (done) ->
-      wiredRemote.addProjection 'ExampleProjection', ExampleProjection
-      wiredRemote.initializeProjectionInstance 'ExampleProjection',
-        aggregateId: 123
-      .then (projectionId) ->
-        wiredRemote.subscribe 'projection:ExampleProjection:changed', (event) ->
-          expect(event.projection.projectedCreated).to.be.true
+      it 'should publish the domainevent with context', (done) ->
+        wiredRemote.subscribeToAllDomainEvents (domainEvent) ->
+          expect(domainEvent.payload.assignedCreated).to.be.ok
           done()
         wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+
+
+      it 'should publish the domain event with context, eventName', (done) ->
+        wiredRemote.subscribeToDomainEvent 'ExampleCreated', (domainEvent) ->
+          expect(domainEvent.payload.assignedCreated).to.be.ok
+          done()
+        wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+
+
+      it 'should publish the domain event with context, eventName, aggregateId', (done) ->
+        wiredRemote.subscribeToDomainEventWithAggregateId 'ExampleCreated', 123, (domainEvent) ->
+          expect(domainEvent.payload.assignedCreated).to.be.ok
+          done()
+        wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+
+
+      it 'should populate the remote with the given event which is applied to later created projections', ->
+        wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+        wiredRemote.addProjection 'ExampleProjection', ExampleProjection
+        wiredRemote.initializeProjectionInstance 'ExampleProjection',
+          aggregateId: 123
+        .then (projectionId) ->
+          projection = wiredRemote.getProjectionInstance projectionId
+          expect(projection.projectedCreated).to.be.true
+
+
+      it 'should publish the domain event so domain event subscribers are notified of it', (done) ->
+        wiredRemote.addProjection 'ExampleProjection', ExampleProjection
+        wiredRemote.initializeProjectionInstance 'ExampleProjection',
+          aggregateId: 123
+        .then (projectionId) ->
+          wiredRemote.subscribe 'projection:ExampleProjection:changed', (event) ->
+            expect(event.projection.projectedCreated).to.be.true
+            done()
+          wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+
+
+    describe 'given two projections where the first projection handles one event and the other one both events', ->
+
+      projection = null
+
+      beforeEach ->
+        class FirstProjection
+          initialize: (params, done) ->
+            @$subscribeHandlersWithAggregateId params.aggregateId
+            done()
+
+          handleExampleCreated: (domainEvent) ->
+
+
+        class SecondProjection
+          initialize: (params, done) ->
+            @$subscribeHandlersWithAggregateId params.aggregateId
+            @actions = []
+            done()
+
+          handleExampleCreated: (domainEvent) ->
+            @actions.push 'created'
+
+          handleExampleModified: (domainEvent) ->
+            @actions.push 'modified'
+
+
+        wiredRemote.addProjection 'FirstProjection', FirstProjection
+        wiredRemote.addProjection 'SecondProjection', SecondProjection
+        wiredRemote.initializeProjectionInstance 'FirstProjection',
+          aggregateId: 123
+        .then (projectionId) ->
+          wiredRemote.initializeProjectionInstance 'SecondProjection',
+            aggregateId: 123
+        .then (projectionId) ->
+          projection = wiredRemote.getProjectionInstance projectionId
+
+
+      it 'should emit the domain events to the second projection in the correct order', (done) ->
+        wiredRemote.subscribeToDomainEvent 'ExampleModified', ->
+          setTimeout ->
+            expect(projection.actions[0]).to.equal 'created'
+            expect(projection.actions[1]).to.equal 'modified'
+            done()
+        wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+        wiredRemote.$emitDomainEvent 'ExampleModified', 123, emittedModified: true
 
 
   describe '#wiredRemote.$onCommand', ->
