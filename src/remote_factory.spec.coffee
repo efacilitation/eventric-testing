@@ -187,7 +187,7 @@ describe 'remote factory', ->
         expect(true).to.be.ok
 
 
-  describe.only '#wiredRemote.$waitForEmitDomainEvent', ->
+  describe '#wiredRemote.$waitForEmitDomainEvent', ->
 
     it 'should wait until the most current emit domain event operation is finished', ->
       domainEventHandlerSpy = sandbox.spy()
