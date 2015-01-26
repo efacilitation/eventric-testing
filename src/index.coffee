@@ -316,7 +316,9 @@ eventric.testing =
   *   projection = wiredRemote.getProjectionInstance(projectionId);
   *   expect(projection.actionLog).to.deep.equal(['created', 'modified']);
   *   wiredRemote.$emitDomainEvent('SomethingCreated', {});
-  *   expect(projection.actionLog.length).to.equal(3);
+  *   return wiredRemote.$waitForEmitDomainEvent().then(function() {
+  *     expect(projection.actionLog.length).to.equal(3);
+  *   });
   * });
   * ```
   ###

@@ -266,7 +266,9 @@ wiredRemote.initializeProjectionInstance('RemoteProjection')
   projection = wiredRemote.getProjectionInstance(projectionId);
   expect(projection.actionLog).to.deep.equal(['created', 'modified']);
   wiredRemote.$emitDomainEvent('SomethingCreated', {});
-  expect(projection.actionLog.length).to.equal(3);
+  return wiredRemote.$waitForEmitDomainEvent().then(function() {
+    expect(projection.actionLog.length).to.equal(3);
+  });
 });
 ```
 
@@ -332,12 +334,11 @@ var domainEvent = eventricTesting.createDomainEvent('example', 'SomethingHappene
 ```
 
 
-#### restore()
+#### destroy()
 
 
 
-Restores eventric to a clean state:
-- Removes all registered DomainEventHandlers from the contexts
+Destroys all wired remotes and removes all registered DomainEventHandlers from the contexts
 
 Example:
 ```javascript
