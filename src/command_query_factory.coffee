@@ -39,4 +39,18 @@ class CommandQueryFactory
     }
 
 
+  waitUntilQueryIsReady: (queryCallback) ->
+    new Promise (resolve, reject) ->
+      pollQuery = ->
+        queryCallback()
+        .then (result) ->
+          if result
+            resolve result
+          else
+            setTimeout pollQuery, 0
+        .catch (error) ->
+          reject error || new Error 'waitUntilQueryIsReady error'
+      pollQuery()
+
+
 module.exports = new CommandQueryFactory

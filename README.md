@@ -343,8 +343,26 @@ Destroys all wired remotes and removes all registered DomainEventHandlers from t
 Example:
 ```javascript
 afterEach(function() {
-  eventricTesting.restore()
+  eventricTesting.destroy()
 })
+```
+
+
+#### waitUntilQueryIsReady()
+
+Params:
+- *callback* { Function } - which executes the query once
+
+Helps to deal with commands which rely on eventual consistent data from queries.
+Executes the given query callback repeatedly until the query yields a result.
+
+Example:
+```javascript
+eventricTesting.waitUntilQueryIsReady(function() {
+  return context.query('getAccountById', {id: 'account-1'});
+}).then(function(queryData) {
+  console.log('query returns data now', queryData);
+});
 ```
 
 

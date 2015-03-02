@@ -46,3 +46,40 @@ describe 'command/query factory', ->
         expect(@$emitDomainEvent).to.equal wiredQueryHandler.$emitDomainEvent
       wiredQueryHandler = commandQueryFactory.wiredCommandHandler queryHandler
       wiredQueryHandler()
+
+
+  describe '#waitUntilQueryIsReady', ->
+
+    describe 'given a query callback which rejects', ->
+
+      it 'should reject', ->
+        commandQueryFactory.waitUntilQueryIsReady ->
+          new Promise (resolve, reject) ->
+            reject()
+        .catch (error) ->
+          expect(error).to.be.ok
+
+
+    describe 'given a query callback which resolves without a result', ->
+
+      it 'should execute the query callback repeatedly', ->
+        callCount = 0
+        commandQueryFactory.waitUntilQueryIsReady ->
+          callCount++
+          new Promise (resolve, reject) ->
+            if callCount < 5
+              resolve null
+            else
+              resolve {}
+        .then ->
+          expect(callCount).to.equal 5
+
+
+    describe 'given a query callback which resolves with a result', ->
+
+      it 'should resolve with the result', ->
+        commandQueryFactory.waitUntilQueryIsReady ->
+          new Promise (resolve, reject) ->
+            resolve {}
+        .then (result) ->
+          expect(result).to.be.ok
