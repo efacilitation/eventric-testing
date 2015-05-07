@@ -1,3 +1,5 @@
+require('es6-promise').polyfill()
+
 if typeof window isnt 'undefined'
   root = window
 else
@@ -17,5 +19,3 @@ if !root._spec_setup
 
 afterEach ->
   sandbox.restore()
-
-
