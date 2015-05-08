@@ -93,17 +93,6 @@ describe 'remote factory', ->
           expect(projection.projectedCreated).to.be.true
 
 
-      it 'should publish the domain event so domain event subscribers are notified of it', (done) ->
-        wiredRemote.addProjection 'ExampleProjection', ExampleProjection
-        wiredRemote.initializeProjectionInstance 'ExampleProjection',
-          aggregateId: 123
-        .then (projectionId) ->
-          wiredRemote.subscribe 'projection:ExampleProjection:changed', (event) ->
-            expect(event.projection.projectedCreated).to.be.true
-            done()
-          wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
-
-
     describe 'given two projections where the first projection handles one event and the other one both events', ->
 
       projection = null
@@ -210,7 +199,8 @@ describe 'remote factory', ->
         @exampleCount++
 
 
-    it 'should remove the stored domain events', (done) ->
+    it 'should remove the stored domain events', ->
+      projection = null
       wiredRemote.$populateWithDomainEvent 'ExampleCreated', 123, emittedCreated: true
       wiredRemote.$destroy()
       wiredRemote.addProjection 'ExampleReportingProjection', ExampleReportingProjection
@@ -218,10 +208,9 @@ describe 'remote factory', ->
         aggregateId: 123
       .then (projectionId) ->
         projection = wiredRemote.getProjectionInstance projectionId
-        wiredRemote.subscribe 'projection:ExampleReportingProjection:changed', ->
-          expect(projection.exampleCount).to.equal 1
-          done()
         wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+      .then ->
+        expect(projection.exampleCount).to.equal 1
 
 
     it 'should unsubscribe all subscribers', (done) ->
@@ -247,4 +236,3 @@ describe 'remote factory', ->
       wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
       wiredRemote.$destroy().then ->
         expect(domainEventHandlerSpy).to.have.been.called
-

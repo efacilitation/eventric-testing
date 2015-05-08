@@ -33,7 +33,7 @@ class RemoteFactory
           Promise.all([contextEventPublish, contextAndNameEventPublish])
 
 
-    wiredRemote.$waitForEmitDomainEvent = =>
+    wiredRemote.$waitForEmitDomainEvent = ->
       wiredRemote._mostCurrentEmitOperation
 
 
