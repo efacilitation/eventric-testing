@@ -186,7 +186,6 @@ describe 'remote factory', ->
         expect(domainEventHandlerSpy).to.have.been.called
 
 
-
   describe '#wiredRemote.$destroy', ->
 
     class ExampleReportingProjection
@@ -195,7 +194,7 @@ describe 'remote factory', ->
         @$subscribeHandlersWithAggregateId params.aggregateId
         done()
 
-      handleExampleCreated: () ->
+      handleExampleCreated: ->
         @exampleCount++
 
 

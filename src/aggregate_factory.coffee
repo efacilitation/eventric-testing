@@ -1,5 +1,6 @@
 eventric  = require 'eventric'
 Aggregate = eventric.Aggregate
+Context = eventric.Context
 
 stubFactory = require './stub_factory'
 
@@ -22,8 +23,14 @@ class AggregateFactory
 
 
   _createFakeContext: (domainEvents) ->
-    name: 'eventric-testing'
+    contextFake =
+      _eventric: eventric
+      name: 'eventric-testing'
+
+    name: contextFake.name
     getDomainEvent: (name) -> domainEvents[name]
+    createDomainEvent: ->
+      Context::createDomainEvent.apply contextFake, arguments
 
 
 module.exports = new AggregateFactory

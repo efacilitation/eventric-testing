@@ -37,7 +37,6 @@ describe 'projection factory', ->
           aggregate: sinon.match.object
 
 
-
     describe 'when given a projection which subscribes to events with a specific aggregate id', ->
 
       class ExampleProjection
