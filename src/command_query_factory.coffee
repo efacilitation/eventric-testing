@@ -61,4 +61,23 @@ class CommandQueryFactory
       pollQuery()
 
 
+  waitUntilCommandResolves: (context, commandName, params, timeout = 5000) ->
+    new Promise (resolve, reject) ->
+      startTime = new Date()
+
+      pollCommand = ->
+        context.command commandName, params
+        .then resolve
+        .catch (error) ->
+          if (new Date() - startTime) >= timeout
+            reject new Error """
+              waitUntilCommandResolves timed out for command '#{commandName}' on context '#{context.name}'
+              with params #{JSON.stringify(params)}
+            """
+          else
+            setTimeout pollCommand, 15
+
+      pollCommand()
+
+
 module.exports = new CommandQueryFactory

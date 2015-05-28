@@ -53,14 +53,14 @@ describe 'command/query factory', ->
   describe '#waitUntilQueryIsReady', ->
 
     it 'should call the given query on the given context with the given params', ->
-      queryStub = sandbox.stub()
+      queryStub = sandbox.stub().returns new Promise (resolve) -> resolve {}
       queryParams = {}
       exampleContext = eventric.context 'Example'
       exampleContext.addQueryHandler 'getSomething', queryStub
       exampleContext.initialize()
       .then ->
         commandQueryFactory.waitUntilQueryIsReady exampleContext, 'getSomething', queryParams
-      .catch (receivedError) ->
+      .then ->
         expect(queryStub).to.have.been.calledWith queryParams
 
 
@@ -119,5 +119,65 @@ describe 'command/query factory', ->
         expect(error).to.be.an.instanceof Error
         expect(error.message).to.contain 'Example'
         expect(error.message).to.contain 'getSomething'
+        expect(error.message).to.match /"foo"\:\s*"bar"/
+
+
+  describe '#waitUntilCommandResolves', ->
+
+    it 'should call the given command on the given context with the given params', ->
+      commandStub = sandbox.stub().returns new Promise (resolve) -> resolve()
+      commandParams = {}
+      exampleContext = eventric.context 'Example'
+      exampleContext.addCommandHandler 'DoSomething', commandStub
+      exampleContext.initialize()
+      .then ->
+        commandQueryFactory.waitUntilCommandResolves exampleContext, 'DoSomething', commandParams
+      .then ->
+        expect(commandStub).to.have.been.calledWith commandParams
+
+
+    it 'should resolve with the result given a command which resolves with a result', ->
+      commandResult = {}
+      exampleContext = eventric.context 'Example'
+      exampleContext.addCommandHandler 'DoSomething', ->
+        new Promise (resolve) -> resolve commandResult
+      exampleContext.initialize()
+      .then ->
+        commandQueryFactory.waitUntilCommandResolves exampleContext, 'DoSomething'
+      .then (receivedResult) ->
+        expect(receivedResult).to.equal commandResult
+
+
+    it 'should execute the command repeatedly given a command which first rejects and resolves after a while', ->
+      exampleContext = eventric.context 'Example'
+      callCount = 0
+      exampleContext.addCommandHandler 'DoSomething', ->
+        new Promise (resolve, reject) ->
+          callCount++
+          if callCount >= 5
+            resolve()
+          else
+            reject()
+      exampleContext.initialize()
+      .then ->
+        commandQueryFactory.waitUntilCommandResolves exampleContext, 'DoSomething'
+      .then ->
+        expect(callCount).to.equal 5
+
+
+    it 'should reject with a descriptive error given a command which does not yield a result within the timeout', ->
+      exampleContext = eventric.context 'Example'
+      exampleContext.addCommandHandler 'DoSomething', ->
+        new Promise (resolve) ->
+          setTimeout ->
+            resolve()
+          , 100
+      exampleContext.initialize()
+      .then ->
+        commandQueryFactory.waitUntilCommandResolves exampleContext, 'DoSomething', {foo: 'bar'}, 50
+      .catch (error) ->
+        expect(error).to.be.an.instanceof Error
+        expect(error.message).to.contain 'Example'
+        expect(error.message).to.contain 'DoSomething'
         expect(error.message).to.match /"foo"\:\s*"bar"/
 
