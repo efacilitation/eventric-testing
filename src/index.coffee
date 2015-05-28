@@ -419,25 +419,12 @@ eventric.testing =
     wiredRemotes = []
 
 
-  ###*
-  * @name waitUntilQueryIsReady
-  * @param {Function} callback which executes the query once
-  * @description
-  *
-  * Helps to deal with commands which rely on eventual consistent data from queries.
-  * Executes the given query callback repeatedly until the query yields a result.
-  *
-  * Example:
-  * ```javascript
-  * eventricTesting.waitUntilQueryIsReady(function() {
-  *   return context.query('getAccountById', {id: 'account-1'});
-  * }).then(function(queryData) {
-  *   console.log('query returns data now', queryData);
-  * });
-  * ```
-  ###
-  waitUntilQueryIsReady: (queryCallback) ->
-    commandQueryFactory.waitUntilQueryIsReady queryCallback
+  waitUntilQueryIsReady: (args...) ->
+    commandQueryFactory.waitUntilQueryIsReady args...
+
+
+  waitUntilCommandResolves: (args...) ->
+    commandQueryFactory.waitUntilCommandResolves args...
 
 
 module.exports = eventric.testing
