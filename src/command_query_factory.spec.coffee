@@ -1,5 +1,7 @@
 describe 'command/query factory', ->
 
+  eventric = require 'eventric'
+
   commandQueryFactory = require './command_query_factory'
   stubFactory = require './stub_factory'
 
@@ -50,36 +52,72 @@ describe 'command/query factory', ->
 
   describe '#waitUntilQueryIsReady', ->
 
-    describe 'given a query callback which rejects', ->
+    it 'should call the given query on the given context with the given params', ->
+      queryStub = sandbox.stub()
+      queryParams = {}
+      exampleContext = eventric.context 'Example'
+      exampleContext.addQueryHandler 'getSomething', queryStub
+      exampleContext.initialize()
+      .then ->
+        commandQueryFactory.waitUntilQueryIsReady exampleContext, 'getSomething', queryParams
+      .catch (receivedError) ->
+        expect(queryStub).to.have.been.calledWith queryParams
 
-      it 'should reject', ->
-        commandQueryFactory.waitUntilQueryIsReady ->
-          new Promise (resolve, reject) ->
-            reject()
-        .catch (error) ->
-          expect(error).to.be.ok
+
+    it 'should reject with an error given a query which rejects with an error', ->
+      error = new Error
+      exampleContext = eventric.context 'Example'
+      exampleContext.addQueryHandler 'getSomething', ->
+        new Promise (resolve, reject) -> reject error
+      exampleContext.initialize()
+      .then ->
+        commandQueryFactory.waitUntilQueryIsReady exampleContext, 'getSomething'
+      .catch (receivedError) ->
+        expect(receivedError).to.equal error
 
 
-    describe 'given a query callback which resolves without a result', ->
+    it 'should resolve with the result given a query callback which resolves with a result', ->
+      queryResult = {}
+      exampleContext = eventric.context 'Example'
+      exampleContext.addQueryHandler 'getSomething', ->
+        new Promise (resolve) -> resolve queryResult
+      exampleContext.initialize()
+      .then ->
+        commandQueryFactory.waitUntilQueryIsReady exampleContext, 'getSomething'
+      .then (receivedResult) ->
+        expect(receivedResult).to.equal queryResult
 
-      it 'should execute the query callback repeatedly', ->
-        callCount = 0
-        commandQueryFactory.waitUntilQueryIsReady ->
+
+    it 'should execute the query repeatedly given a query which resolves but not with immediately with a result', ->
+      exampleContext = eventric.context 'Example'
+      callCount = 0
+      exampleContext.addQueryHandler 'getSomething', ->
+        new Promise (resolve, reject) ->
           callCount++
-          new Promise (resolve, reject) ->
-            if callCount < 5
-              resolve null
-            else
-              resolve {}
-        .then ->
-          expect(callCount).to.equal 5
-
-
-    describe 'given a query callback which resolves with a result', ->
-
-      it 'should resolve with the result', ->
-        commandQueryFactory.waitUntilQueryIsReady ->
-          new Promise (resolve, reject) ->
+          if callCount < 5
+            resolve null
+          else
             resolve {}
-        .then (result) ->
-          expect(result).to.be.ok
+      exampleContext.initialize()
+      .then ->
+        commandQueryFactory.waitUntilQueryIsReady exampleContext, 'getSomething'
+      .then ->
+        expect(callCount).to.equal 5
+
+
+    it 'should reject with a descriptive error given a query which does not yield a result within the timeout', ->
+      exampleContext = eventric.context 'Example'
+      exampleContext.addQueryHandler 'getSomething', ->
+        new Promise (resolve) ->
+          setTimeout ->
+            resolve()
+          , 100
+      exampleContext.initialize()
+      .then ->
+        commandQueryFactory.waitUntilQueryIsReady exampleContext, 'getSomething', {foo: 'bar'}, 50
+      .catch (error) ->
+        expect(error).to.be.an.instanceof Error
+        expect(error.message).to.contain 'Example'
+        expect(error.message).to.contain 'getSomething'
+        expect(error.message).to.match /"foo"\:\s*"bar"/
+

@@ -39,17 +39,25 @@ class CommandQueryFactory
     }
 
 
-  waitUntilQueryIsReady: (queryCallback) ->
+  waitUntilQueryIsReady: (context, queryName, params, timeout = 5000) ->
     new Promise (resolve, reject) ->
+      startTime = new Date()
+
       pollQuery = ->
-        queryCallback()
+        context.query queryName, params
         .then (result) ->
           if result
             resolve result
+          else if (new Date() - startTime) >= timeout
+            reject new Error """
+              waitUntilQueryIsReady timed out for query '#{queryName}' on context '#{context.name}'
+              with params #{JSON.stringify(params)}
+            """
           else
-            setTimeout pollQuery, 0
+            setTimeout pollQuery, 15
         .catch (error) ->
           reject error || new Error 'waitUntilQueryIsReady error'
+
       pollQuery()
 
 
