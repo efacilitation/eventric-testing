@@ -1,6 +1,6 @@
 {
   "name": "eventric-testing",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Testing helpers for eventric.js",
   "url": "http://eventricjs.org",
   "keywords": [
