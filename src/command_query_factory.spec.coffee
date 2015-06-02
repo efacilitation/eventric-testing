@@ -56,7 +56,7 @@ describe 'command/query factory', ->
       queryStub = sandbox.stub().returns new Promise (resolve) -> resolve {}
       queryParams = {}
       exampleContext = eventric.context 'Example'
-      exampleContext.addQueryHandler 'getSomething', queryStub
+      exampleContext.addQueryHandlers getSomething: queryStub
       exampleContext.initialize()
       .then ->
         commandQueryFactory.waitUntilQueryIsReady exampleContext, 'getSomething', queryParams
@@ -67,7 +67,7 @@ describe 'command/query factory', ->
     it 'should reject with an error given a query which rejects with an error', ->
       error = new Error
       exampleContext = eventric.context 'Example'
-      exampleContext.addQueryHandler 'getSomething', ->
+      exampleContext.addQueryHandlers getSomething: ->
         new Promise (resolve, reject) -> reject error
       exampleContext.initialize()
       .then ->
@@ -79,7 +79,7 @@ describe 'command/query factory', ->
     it 'should resolve with the result given a query callback which resolves with a result', ->
       queryResult = {}
       exampleContext = eventric.context 'Example'
-      exampleContext.addQueryHandler 'getSomething', ->
+      exampleContext.addQueryHandlers getSomething: ->
         new Promise (resolve) -> resolve queryResult
       exampleContext.initialize()
       .then ->
@@ -91,7 +91,7 @@ describe 'command/query factory', ->
     it 'should execute the query repeatedly given a query which resolves but not with immediately with a result', ->
       exampleContext = eventric.context 'Example'
       callCount = 0
-      exampleContext.addQueryHandler 'getSomething', ->
+      exampleContext.addQueryHandlers getSomething: ->
         new Promise (resolve, reject) ->
           callCount++
           if callCount < 5
@@ -107,7 +107,7 @@ describe 'command/query factory', ->
 
     it 'should reject with a descriptive error given a query which does not yield a result within the timeout', ->
       exampleContext = eventric.context 'Example'
-      exampleContext.addQueryHandler 'getSomething', ->
+      exampleContext.addQueryHandlers getSomething: ->
         new Promise (resolve) ->
           setTimeout ->
             resolve()
@@ -128,7 +128,7 @@ describe 'command/query factory', ->
       commandStub = sandbox.stub().returns new Promise (resolve) -> resolve()
       commandParams = {}
       exampleContext = eventric.context 'Example'
-      exampleContext.addCommandHandler 'DoSomething', commandStub
+      exampleContext.addCommandHandlers DoSomething: commandStub
       exampleContext.initialize()
       .then ->
         commandQueryFactory.waitUntilCommandResolves exampleContext, 'DoSomething', commandParams
@@ -139,7 +139,7 @@ describe 'command/query factory', ->
     it 'should resolve with the result given a command which resolves with a result', ->
       commandResult = {}
       exampleContext = eventric.context 'Example'
-      exampleContext.addCommandHandler 'DoSomething', ->
+      exampleContext.addCommandHandlers DoSomething: ->
         new Promise (resolve) -> resolve commandResult
       exampleContext.initialize()
       .then ->
@@ -151,7 +151,7 @@ describe 'command/query factory', ->
     it 'should execute the command repeatedly given a command which first rejects and resolves after a while', ->
       exampleContext = eventric.context 'Example'
       callCount = 0
-      exampleContext.addCommandHandler 'DoSomething', ->
+      exampleContext.addCommandHandlers DoSomething: ->
         new Promise (resolve, reject) ->
           callCount++
           if callCount >= 5
@@ -167,7 +167,7 @@ describe 'command/query factory', ->
 
     it 'should reject with a descriptive error given a command which does not yield a result within the timeout', ->
       exampleContext = eventric.context 'Example'
-      exampleContext.addCommandHandler 'DoSomething', ->
+      exampleContext.addCommandHandlers DoSomething: ->
         new Promise (resolve) ->
           setTimeout ->
             resolve()
