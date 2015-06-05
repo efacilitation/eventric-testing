@@ -185,28 +185,29 @@ describe 'command/query factory', ->
 
     it 'should call the given promise factory', ->
       promiseFactoryStub = sandbox.stub().returns new Promise (resolve) -> resolve true
-      commandQueryFactory.waitForCondition promiseFactoryStub
+      commandQueryFactory.waitForResult promiseFactoryStub
       .then ->
         expect(promiseFactoryStub).to.have.been.called
 
 
-    it 'should resolve given a promise factory which resolves with a truthy value', ->
-      promiseFactory = -> new Promise (resolve) -> resolve true
-      waitForCondition = commandQueryFactory.waitForCondition promiseFactory
-      .then ->
-        expect(waitForCondition).to.be.ok
+    it 'should resolve with the result given a promise factory which resolves with a result', ->
+      result = {}
+      promiseFactory = -> new Promise (resolve) -> resolve result
+      commandQueryFactory.waitForResult promiseFactory
+      .then (receivedResult) ->
+        expect(receivedResult).to.equal result
 
 
-    it 'should execute the promise factory repeatedly given it only resolves with a truthy value after a few calls', ->
+    it 'should execute the promise factory repeatedly given it only resolves with a result after a few calls', ->
       callCount = 0
       promiseFactory = ->
         new Promise (resolve, reject) ->
           callCount++
           if callCount >= 3
-            resolve true
+            resolve {}
           else
-            resolve false
-      commandQueryFactory.waitForCondition promiseFactory
+            resolve()
+      commandQueryFactory.waitForResult promiseFactory
       .then ->
         expect(callCount).to.equal 3
 
@@ -214,7 +215,7 @@ describe 'command/query factory', ->
     it 'should reject with an error given a promise factory which rejects', ->
       error = new Error
       promiseFactory = -> new Promise (resolve, reject) -> reject error
-      commandQueryFactory.waitForCondition promiseFactory
+      commandQueryFactory.waitForResult promiseFactory
       .catch (receviedError) ->
         expect(receviedError).to.equal error
 
@@ -225,7 +226,7 @@ describe 'command/query factory', ->
           setTimeout ->
             resolve()
           , 100
-      commandQueryFactory.waitForCondition promiseFactory, 50
+      commandQueryFactory.waitForResult promiseFactory, 50
       .catch (error) ->
         expect(error).to.be.an.instanceof Error
 

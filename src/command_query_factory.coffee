@@ -40,16 +40,9 @@ class CommandQueryFactory
 
 
   waitForQueryToReturnResult: (context, queryName, params, timeout = 5000) ->
-    queryResult = null
-    @waitForCondition ->
+    @waitForResult ->
       context.query queryName, params
-      .then (_queryResult) ->
-        if _queryResult
-          queryResult = _queryResult
-          return true
     , timeout
-    .then ->
-      queryResult
     .catch (error) ->
       if error.message.indexOf('waitForCondition') > -1
         throw new Error """
@@ -61,17 +54,13 @@ class CommandQueryFactory
 
 
   waitForCommandToResolve: (context, commandName, params, timeout = 5000) ->
-    commandResult = null
-    @waitForCondition ->
+    @waitForResult ->
       context.command commandName, params
-      .then (_commandResult) ->
-        commandResult = _commandResult
-        true
+      .then (result) ->
+        return result || true
       .catch ->
-        false
+        return null
     , timeout
-    .then ->
-      commandResult
     .catch ->
       throw new Error """
         waitForCommandToResolve timed out for command '#{commandName}' on context '#{context.name}'
@@ -79,16 +68,15 @@ class CommandQueryFactory
       """
 
 
-  waitForCondition: (promiseFactory, timeout = 5000) ->
+  waitForResult: (promiseFactory, timeout = 5000) ->
     new Promise (resolve, reject) ->
       startTime = new Date()
 
       pollPromise = ->
         promiseFactory()
-        .then (isFulfilled) ->
-
-          if isFulfilled
-            resolve()
+        .then (result) ->
+          if result
+            resolve result
             return
 
           timeoutExceeded = (new Date() - startTime) >= timeout
