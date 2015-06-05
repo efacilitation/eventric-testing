@@ -44,7 +44,7 @@ class CommandQueryFactory
       context.query queryName, params
     , timeout
     .catch (error) ->
-      if error.message.indexOf('waitForCondition') > -1
+      if error?.message?.indexOf('waitForCondition') > -1
         throw new Error """
           waitUntilQueryIsReady timed out for query '#{queryName}' on context '#{context.name}'
           with params #{JSON.stringify(params)}

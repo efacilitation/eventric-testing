@@ -64,7 +64,7 @@ describe 'command/query factory', ->
         expect(queryStub).to.have.been.calledWith queryParams
 
 
-    it 'should reject with an error given a query which rejects with an error', ->
+    it 'should reject with the query error given a query which rejects with an error', ->
       error = new Error
       exampleContext = eventric.context 'Example'
       exampleContext.addQueryHandlers getSomething: -> new Promise (resolve, reject) -> reject error
@@ -73,6 +73,16 @@ describe 'command/query factory', ->
         commandQueryFactory.waitForQueryToReturnResult exampleContext, 'getSomething'
       .catch (receivedError) ->
         expect(receivedError).to.equal error
+
+
+    it 'should reject with the query error gven a query which rejects with a string', ->
+      exampleContext = eventric.context 'Example'
+      exampleContext.addQueryHandlers getSomething: -> new Promise (resolve, reject) -> reject 'error'
+      exampleContext.initialize()
+      .then ->
+        commandQueryFactory.waitForQueryToReturnResult exampleContext, 'getSomething'
+      .catch (error) ->
+        expect(error).to.equal 'error'
 
 
     it 'should resolve with the result given a query callback which resolves with a result', ->
