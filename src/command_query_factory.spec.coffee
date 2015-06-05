@@ -50,7 +50,7 @@ describe 'command/query factory', ->
       wiredQueryHandler()
 
 
-  describe '#waitUntilQueryIsReady', ->
+  describe '#waitForQueryToBeReady', ->
 
     it 'should call the given query on the given context with the given params', ->
       queryStub = sandbox.stub().returns new Promise (resolve) -> resolve {}
@@ -59,7 +59,7 @@ describe 'command/query factory', ->
       exampleContext.addQueryHandlers getSomething: queryStub
       exampleContext.initialize()
       .then ->
-        commandQueryFactory.waitUntilQueryIsReady exampleContext, 'getSomething', queryParams
+        commandQueryFactory.waitForQueryToBeReady exampleContext, 'getSomething', queryParams
       .then ->
         expect(queryStub).to.have.been.calledWith queryParams
 
@@ -67,11 +67,10 @@ describe 'command/query factory', ->
     it 'should reject with an error given a query which rejects with an error', ->
       error = new Error
       exampleContext = eventric.context 'Example'
-      exampleContext.addQueryHandlers getSomething: ->
-        new Promise (resolve, reject) -> reject error
+      exampleContext.addQueryHandlers getSomething: -> new Promise (resolve, reject) -> reject error
       exampleContext.initialize()
       .then ->
-        commandQueryFactory.waitUntilQueryIsReady exampleContext, 'getSomething'
+        commandQueryFactory.waitForQueryToBeReady exampleContext, 'getSomething'
       .catch (receivedError) ->
         expect(receivedError).to.equal error
 
@@ -83,7 +82,7 @@ describe 'command/query factory', ->
         new Promise (resolve) -> resolve queryResult
       exampleContext.initialize()
       .then ->
-        commandQueryFactory.waitUntilQueryIsReady exampleContext, 'getSomething'
+        commandQueryFactory.waitForQueryToBeReady exampleContext, 'getSomething'
       .then (receivedResult) ->
         expect(receivedResult).to.equal queryResult
 
@@ -100,7 +99,7 @@ describe 'command/query factory', ->
             resolve {}
       exampleContext.initialize()
       .then ->
-        commandQueryFactory.waitUntilQueryIsReady exampleContext, 'getSomething'
+        commandQueryFactory.waitForQueryToBeReady exampleContext, 'getSomething'
       .then ->
         expect(callCount).to.equal 5
 
@@ -114,7 +113,7 @@ describe 'command/query factory', ->
           , 100
       exampleContext.initialize()
       .then ->
-        commandQueryFactory.waitUntilQueryIsReady exampleContext, 'getSomething', {foo: 'bar'}, 50
+        commandQueryFactory.waitForQueryToBeReady exampleContext, 'getSomething', {foo: 'bar'}, 50
       .catch (error) ->
         expect(error).to.be.an.instanceof Error
         expect(error.message).to.contain 'Example'
@@ -122,7 +121,7 @@ describe 'command/query factory', ->
         expect(error.message).to.match /"foo"\:\s*"bar"/
 
 
-  describe '#waitUntilCommandResolves', ->
+  describe '#waitForCommandToResolve', ->
 
     it 'should call the given command on the given context with the given params', ->
       commandStub = sandbox.stub().returns new Promise (resolve) -> resolve()
@@ -131,7 +130,7 @@ describe 'command/query factory', ->
       exampleContext.addCommandHandlers DoSomething: commandStub
       exampleContext.initialize()
       .then ->
-        commandQueryFactory.waitUntilCommandResolves exampleContext, 'DoSomething', commandParams
+        commandQueryFactory.waitForCommandToResolve exampleContext, 'DoSomething', commandParams
       .then ->
         expect(commandStub).to.have.been.calledWith commandParams
 
@@ -143,7 +142,7 @@ describe 'command/query factory', ->
         new Promise (resolve) -> resolve commandResult
       exampleContext.initialize()
       .then ->
-        commandQueryFactory.waitUntilCommandResolves exampleContext, 'DoSomething'
+        commandQueryFactory.waitForCommandToResolve exampleContext, 'DoSomething'
       .then (receivedResult) ->
         expect(receivedResult).to.equal commandResult
 
@@ -160,7 +159,7 @@ describe 'command/query factory', ->
             reject()
       exampleContext.initialize()
       .then ->
-        commandQueryFactory.waitUntilCommandResolves exampleContext, 'DoSomething'
+        commandQueryFactory.waitForCommandToResolve exampleContext, 'DoSomething'
       .then ->
         expect(callCount).to.equal 5
 
@@ -174,10 +173,60 @@ describe 'command/query factory', ->
           , 100
       exampleContext.initialize()
       .then ->
-        commandQueryFactory.waitUntilCommandResolves exampleContext, 'DoSomething', {foo: 'bar'}, 50
+        commandQueryFactory.waitForCommandToResolve exampleContext, 'DoSomething', {foo: 'bar'}, 50
       .catch (error) ->
         expect(error).to.be.an.instanceof Error
         expect(error.message).to.contain 'Example'
         expect(error.message).to.contain 'DoSomething'
         expect(error.message).to.match /"foo"\:\s*"bar"/
+
+
+  describe '#waitForCondition', ->
+
+    it 'should call the given promise factory', ->
+      promiseFactoryStub = sandbox.stub().returns new Promise (resolve) -> resolve true
+      commandQueryFactory.waitForCondition promiseFactoryStub
+      .then ->
+        expect(promiseFactoryStub).to.have.been.called
+
+
+    it 'should resolve given a promise factory which resolves with a truthy value', ->
+      promiseFactory = -> new Promise (resolve) -> resolve true
+      waitForCondition = commandQueryFactory.waitForCondition promiseFactory
+      .then ->
+        expect(waitForCondition).to.be.ok
+
+
+    it 'should execute the promise factory repeatedly given it only resolves with a truthy value after a few calls', ->
+      callCount = 0
+      promiseFactory = ->
+        new Promise (resolve, reject) ->
+          callCount++
+          if callCount >= 3
+            resolve true
+          else
+            resolve false
+      commandQueryFactory.waitForCondition promiseFactory
+      .then ->
+        expect(callCount).to.equal 3
+
+
+    it 'should reject with an error given a promise factory which rejects', ->
+      error = new Error
+      promiseFactory = -> new Promise (resolve, reject) -> reject error
+      commandQueryFactory.waitForCondition promiseFactory
+      .catch (receviedError) ->
+        expect(receviedError).to.equal error
+
+
+    it 'should reject with an error given a promise factory which does not yield a result within the timeout', ->
+      promiseFactory = ->
+        new Promise (resolve) ->
+          setTimeout ->
+            resolve()
+          , 100
+      commandQueryFactory.waitForCondition promiseFactory, 50
+      .catch (error) ->
+        expect(error).to.be.an.instanceof Error
+
 
