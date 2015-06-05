@@ -190,12 +190,41 @@ describe 'command/query factory', ->
         expect(promiseFactoryStub).to.have.been.called
 
 
+    it 'should resolve given a promise resolves with an object', ->
+      promiseFactory = -> new Promise (resolve) -> resolve {}
+      waitForResult= commandQueryFactory.waitForResult promiseFactory
+      .then ->
+        expect(waitForResult).to.be.ok
+
+
+    it 'should resolve given a promise resolves with true', ->
+      promiseFactory = -> new Promise (resolve) -> resolve true
+      waitForResult = commandQueryFactory.waitForResult promiseFactory
+      .then ->
+        expect(waitForResult).to.be.ok
+
+
+    it 'should resolve given a promise resolves with false', ->
+      promiseFactory = -> new Promise (resolve) -> resolve false
+      waitForResult = commandQueryFactory.waitForResult promiseFactory
+      .then ->
+        expect(waitForResult).to.be.ok
+
+
+    it 'should not resolve given a promise returns undefined', ->
+      promiseFactory = -> new Promise (resolve) -> resolve undefined
+      commandQueryFactory.waitForResult promiseFactory, 0
+      .catch (error) ->
+        expect(error).to.be.ok
+
+
     it 'should resolve with the result given a promise factory which resolves with a result', ->
       result = {}
       promiseFactory = -> new Promise (resolve) -> resolve result
       commandQueryFactory.waitForResult promiseFactory
       .then (receivedResult) ->
         expect(receivedResult).to.equal result
+
 
 
     it 'should execute the promise factory repeatedly given it only resolves with a result after a few calls', ->

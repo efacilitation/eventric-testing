@@ -59,7 +59,7 @@ class CommandQueryFactory
       .then (result) ->
         return result || true
       .catch ->
-        return null
+        return undefined
     , timeout
     .catch ->
       throw new Error """
@@ -75,7 +75,7 @@ class CommandQueryFactory
       pollPromise = ->
         promiseFactory()
         .then (result) ->
-          if result
+          if result?
             resolve result
             return
 
