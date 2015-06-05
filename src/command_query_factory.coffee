@@ -39,7 +39,7 @@ class CommandQueryFactory
     }
 
 
-  waitForQueryToBeReady: (context, queryName, params, timeout = 5000) ->
+  waitForQueryToReturnResult: (context, queryName, params, timeout = 5000) ->
     queryResult = null
     @waitForCondition ->
       context.query queryName, params

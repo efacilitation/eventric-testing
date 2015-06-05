@@ -50,7 +50,7 @@ describe 'command/query factory', ->
       wiredQueryHandler()
 
 
-  describe '#waitForQueryToBeReady', ->
+  describe '#waitForQueryToReturnResult', ->
 
     it 'should call the given query on the given context with the given params', ->
       queryStub = sandbox.stub().returns new Promise (resolve) -> resolve {}
@@ -59,7 +59,7 @@ describe 'command/query factory', ->
       exampleContext.addQueryHandlers getSomething: queryStub
       exampleContext.initialize()
       .then ->
-        commandQueryFactory.waitForQueryToBeReady exampleContext, 'getSomething', queryParams
+        commandQueryFactory.waitForQueryToReturnResult exampleContext, 'getSomething', queryParams
       .then ->
         expect(queryStub).to.have.been.calledWith queryParams
 
@@ -70,7 +70,7 @@ describe 'command/query factory', ->
       exampleContext.addQueryHandlers getSomething: -> new Promise (resolve, reject) -> reject error
       exampleContext.initialize()
       .then ->
-        commandQueryFactory.waitForQueryToBeReady exampleContext, 'getSomething'
+        commandQueryFactory.waitForQueryToReturnResult exampleContext, 'getSomething'
       .catch (receivedError) ->
         expect(receivedError).to.equal error
 
@@ -82,7 +82,7 @@ describe 'command/query factory', ->
         new Promise (resolve) -> resolve queryResult
       exampleContext.initialize()
       .then ->
-        commandQueryFactory.waitForQueryToBeReady exampleContext, 'getSomething'
+        commandQueryFactory.waitForQueryToReturnResult exampleContext, 'getSomething'
       .then (receivedResult) ->
         expect(receivedResult).to.equal queryResult
 
@@ -99,7 +99,7 @@ describe 'command/query factory', ->
             resolve {}
       exampleContext.initialize()
       .then ->
-        commandQueryFactory.waitForQueryToBeReady exampleContext, 'getSomething'
+        commandQueryFactory.waitForQueryToReturnResult exampleContext, 'getSomething'
       .then ->
         expect(callCount).to.equal 5
 
@@ -113,7 +113,7 @@ describe 'command/query factory', ->
           , 100
       exampleContext.initialize()
       .then ->
-        commandQueryFactory.waitForQueryToBeReady exampleContext, 'getSomething', {foo: 'bar'}, 50
+        commandQueryFactory.waitForQueryToReturnResult exampleContext, 'getSomething', {foo: 'bar'}, 50
       .catch (error) ->
         expect(error).to.be.an.instanceof Error
         expect(error.message).to.contain 'Example'
@@ -181,7 +181,7 @@ describe 'command/query factory', ->
         expect(error.message).to.match /"foo"\:\s*"bar"/
 
 
-  describe '#waitForCondition', ->
+  describe '#waitForResult', ->
 
     it 'should call the given promise factory', ->
       promiseFactoryStub = sandbox.stub().returns new Promise (resolve) -> resolve true
