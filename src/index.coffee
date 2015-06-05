@@ -82,12 +82,16 @@ eventric.testing =
     wiredRemotes = []
 
 
-  waitUntilQueryIsReady: (args...) ->
-    commandQueryFactory.waitUntilQueryIsReady args...
+  waitForQueryToReturnResult: (args...) ->
+    commandQueryFactory.waitForQueryToReturnResult args...
 
 
-  waitUntilCommandResolves: (args...) ->
-    commandQueryFactory.waitUntilCommandResolves args...
+  waitForCommandToResolve: (args...) ->
+    commandQueryFactory.waitForCommandToResolve args...
+
+
+  waitForResult: (args...) ->
+    commandQueryFactory.waitForResult args...
 
 
 module.exports = eventric.testing
