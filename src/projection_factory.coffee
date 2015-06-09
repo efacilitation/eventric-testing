@@ -28,7 +28,7 @@ class ProjectionFactory
     class FakeAggregateClass
     fakeAggregate = aggregateFactory.instantiateAggregateWithFakeContext FakeAggregateClass, domainEvents
     originalHandleDomainEvent = fakeAggregate._handleDomainEvent
-    fakeAggregate._handleDomainEvent = -> originalHandleDomainEvent.apply {root: projection}, arguments
+    fakeAggregate._handleDomainEvent = -> originalHandleDomainEvent.apply {instance: projection}, arguments
 
     projection.$emitDomainEvent = (eventName, aggregateId, payload) ->
       fakeAggregate.id = aggregateId

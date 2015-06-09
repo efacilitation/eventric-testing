@@ -5,7 +5,6 @@ aggregateFactory            = require './aggregate_factory'
 fakePromise                 = require './fake_promise'
 commandQueryFactory         = require './command_query_factory'
 projectionFactory           = require './projection_factory'
-domainEventHandlersFactory  = require './domain_event_handlers_factory'
 remoteFactory               = require './remote_factory'
 domainEventFactory          = require './domain_event_factory'
 
@@ -62,10 +61,6 @@ eventric.testing =
     wiredRemote = remoteFactory.wiredRemote args...
     wiredRemotes.push wiredRemote
     wiredRemote
-
-
-  wiredDomainEventHandlers: (args...) ->
-    domainEventHandlersFactory.wiredDomainEventHandlers args...
 
 
   projectionStoreMongoDbStub: (args...) ->

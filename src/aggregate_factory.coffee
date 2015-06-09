@@ -14,7 +14,7 @@ class AggregateFactory
 
   wiredAggregate: (AggregateClass, domainEvents) ->
     aggregate = @instantiateAggregateWithFakeContext AggregateClass, domainEvents
-    aggregate.root
+    aggregate.instance
 
 
   instantiateAggregateWithFakeContext: (AggregateClass, domainEvents) ->
