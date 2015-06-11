@@ -119,11 +119,15 @@ class RemoteFactory
       unless filteredCommandStubs.length
         return originalCommand.apply @, arguments
 
-      for filteredCommandStub in filteredCommandStubs
-        for domainEvent in filteredCommandStub.domainEvents
+      emitDomainEventAsync = (domainEvent) =>
+        setTimeout =>
           @$emitDomainEvent domainEvent.eventName,
             domainEvent.aggregateId,
             domainEvent.payload
+
+      for filteredCommandStub in filteredCommandStubs
+        for domainEvent in filteredCommandStub.domainEvents
+          emitDomainEventAsync domainEvent
 
       fakePromise.resolve()
 

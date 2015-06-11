@@ -143,11 +143,12 @@ describe 'remote factory', ->
   describe '#wiredRemote.$onCommand', ->
 
     it 'should emit the	associated DomainEvent if a specific command is called', (done) ->
-      wiredRemote.$onCommand 'myCommand', myKey: 'myValue'
-        .yieldsDomainEvent 'ExampleCreated', 123,
-          emittedCreated: true
-        .yieldsDomainEvent 'ExampleModified', 123,
-          emittedModified: true
+      wiredRemote.$onCommand 'myCommand',
+        myKey: 'myValue'
+      .yieldsDomainEvent 'ExampleCreated', 123,
+        emittedCreated: true
+      .yieldsDomainEvent 'ExampleModified', 123,
+        emittedModified: true
 
       wiredRemote.subscribeToDomainEventWithAggregateId 'ExampleCreated', 123, (domainEvent) ->
         expect(domainEvent.payload.assignedCreated).to.be.true
@@ -161,6 +162,8 @@ describe 'remote factory', ->
 
   describe '#wiredRemote.command', ->
 
+    # TODO: "Error: Tried to handle Remote RPC with not registered context context"
+    # Add more expressing error message to eventric (the command is not found, the context is initialized!)
     it 'should delegate the command function if there is no command stub registered', ->
       wiredRemote.command 'myCustomCommand'
       .catch (error) ->
@@ -168,10 +171,13 @@ describe 'remote factory', ->
 
 
     it 'should return a fake promise if a domain event is emitted', ->
-      wiredRemote.$onCommand 'myCommand', myKey: 'myValue'
-        .yieldsDomainEvent 'ExampleCreated', 123,
-          emittedCreated: true
-      wiredRemote.command 'myCommand', myKey: 'myValue'
+      wiredRemote.$onCommand 'myCommand',
+        myKey: 'myValue'
+      .yieldsDomainEvent 'ExampleCreated', 123,
+        emittedCreated: true
+
+      wiredRemote.command 'myCommand',
+        myKey: 'myValue'
       .then ->
         expect(true).to.be.ok
 
