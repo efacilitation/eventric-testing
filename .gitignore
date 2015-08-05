@@ -10,3 +10,5 @@
 .flooignore
 .idea/
 FLOOBITS_README.md
+
+dist/
