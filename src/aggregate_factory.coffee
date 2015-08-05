@@ -2,13 +2,13 @@ eventric  = require 'eventric'
 
 class AggregateFactory
 
-  createAggregate: ({aggregateClass, domainEvents, createParams}) ->
+  createAggregate: ({AggregateClass, domainEvents, createParams}) ->
     context = eventric.context "EventricTesting-#{Math.random()}"
-    context.addAggregate 'TestAggregate', aggregateClass
+    context.addAggregate 'TestAggregate', @_createAggregateClassWithFakeCreateFunction AggregateClass
     context.defineDomainEvents domainEvents
     context.addCommandHandlers
       CreateAggregate: ->
-        @$aggregate.create 'TestAggregate', createParams
+        @$aggregate.create 'TestAggregate'
 
     context.initialize()
     .then ->
@@ -17,6 +17,17 @@ class AggregateFactory
       context.destroy()
       .then ->
         return aggregate
+
+
+  _createAggregateClassWithFakeCreateFunction: (AggregateClass) ->
+    WrappedAggregteClass = ->
+      aggregateInstance = new AggregateClass
+      originalCreate = aggregateInstance.create
+      aggregateInstance.create = ->
+        aggregateInstance.create = originalCreate
+      return aggregateInstance
+
+    return WrappedAggregteClass
 
 
 module.exports = new AggregateFactory

@@ -17,29 +17,36 @@ describe 'aggregate factory', ->
       ExampleCreated: ->
 
 
-    it 'should create an aggregate instance of the given type', ->
-      aggregateFactory.createAggregate
-        aggregateClass: ExampleAggregate
-        domainEvents: domainEvents
-      .then (exampleAggregate) ->
-        expect(exampleAggregate).to.be.an.instanceOf ExampleAggregate
+    exampleAggregate = null
 
 
-    it 'should call the create function with the passed in createParams', ->
-      createParams = {}
+    beforeEach ->
       sandbox.spy ExampleAggregate::, 'create'
       aggregateFactory.createAggregate
-        aggregateClass: ExampleAggregate
+        AggregateClass: ExampleAggregate
         domainEvents: domainEvents
-        createParams: createParams
-      .then (exampleAggregate) ->
-        expect(ExampleAggregate::create).to.have.been.calledWith createParams
+      .then (_exampleAggregate) ->
+        exampleAggregate = _exampleAggregate
+
+
+    it 'should create an aggregate instance of the given type', ->
+      expect(exampleAggregate).to.be.an.instanceOf ExampleAggregate
+
+
+    it 'should not call the original create function on the aggregate instance', ->
+      expect(ExampleAggregate::create).not.to.have.been.called
+
+
+    it 'should be possible to call the origial create function on the aggregate', ->
+      exampleAggregate.create()
+      expect(ExampleAggregate::create).to.have.been.called
 
 
     it 'should create an aggregate capable of emitting and handling domain events', ->
       aggregateFactory.createAggregate
-        aggregateClass: ExampleAggregate
+        AggregateClass: ExampleAggregate
         domainEvents: domainEvents
       .then (exampleAggregate) ->
+        exampleAggregate.create()
         expect(exampleAggregate.$emitDomainEvent).to.be.a 'function'
         expect(exampleAggregate.created).to.be.true
