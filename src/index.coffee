@@ -23,8 +23,8 @@ class EventricTesting
     fakePromise.rejectAsync args...
 
 
-  wiredAggregate: (args...) ->
-    aggregateFactory.wiredAggregate args...
+  createAggregate: (args...) ->
+    aggregateFactory.createAggregate args...
 
 
   wiredRemote: (args...) ->

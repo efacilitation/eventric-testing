@@ -2,7 +2,7 @@ eventric  = require 'eventric'
 
 class AggregateFactory
 
-  createAggregateInstance: (AggregateClass, domainEvents) ->
+  createAggregate: (AggregateClass, domainEvents) ->
     context = eventric.context "EventricTesting-#{Math.random()}"
     context.addAggregate 'test', AggregateClass
     context.defineDomainEvents domainEvents

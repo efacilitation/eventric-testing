@@ -2,7 +2,7 @@ describe 'aggregate factory', ->
 
   aggregateFactory = require './aggregate_factory'
 
-  describe '#createAggregateInstance', ->
+  describe '#createAggregate', ->
     class Example
 
       create: ->
@@ -16,6 +16,6 @@ describe 'aggregate factory', ->
     it 'should create an aggregate instance which is capable of emitting and handling events', ->
       domainEvents =
         ExampleCreated: ->
-      aggregateFactory.createAggregateInstance Example, domainEvents
+      aggregateFactory.createAggregate Example, domainEvents
       .then (example) ->
         expect(example.created).to.be.true
