@@ -2,11 +2,14 @@ eventric  = require 'eventric'
 
 class AggregateFactory
 
-  createAggregate: (AggregateClass, domainEvents) ->
+  createAggregate: ({aggregateClass, domainEvents, createParams}) ->
     context = eventric.context "EventricTesting-#{Math.random()}"
-    context.addAggregate 'test', AggregateClass
+    context.addAggregate 'TestAggregate', aggregateClass
     context.defineDomainEvents domainEvents
-    context.addCommandHandlers CreateAggregate: -> @$aggregate.create 'test'
+    context.addCommandHandlers
+      CreateAggregate: ->
+        @$aggregate.create 'TestAggregate', createParams
+
     context.initialize()
     .then ->
       context.command 'CreateAggregate'
