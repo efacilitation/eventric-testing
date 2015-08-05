@@ -27,13 +27,14 @@
     "type": "git",
     "url": "https://github.com/efacilitation/eventric-testing.git"
   },
-  "main": "build/node/index.js",
+  "main": "dist/release/eventric_testing.js",
   "scripts": {
     "test": "node_modules/.bin/gulp specs",
     "prepublish": "node_modules/.bin/gulp build"
   },
   "devDependencies": {
     "chai": "2.3.0",
+    "coffee-loader": "0.7.2",
     "coffee-script": "1.9.2",
     "commonjs-require": "1.4.6",
     "es6-promise": "2.1.1",
@@ -44,12 +45,16 @@
     "gulp-mocha": "2.0.1",
     "gulp-uglify": "1.2.0",
     "gulp-util": "3.0.4",
-    "gulp-wrap-commonjs": "0.1.13",
+    "karma": "0.12.37",
+    "karma-mocha": "0.2.0",
+    "karma-phantomjs-launcher": "0.2.0",
+    "karma-spec-reporter": "0.0.20",
     "mocha": "2.2.4",
-    "rimraf": "2.3.3",
-    "run-sequence": "1.1.0",
-    "sinon": "1.14.1",
-    "sinon-chai": "2.7.0"
+    "phantomjs": "1.9.17",
+    "run-sequence": "1.1.2",
+    "sinon": "git://github.com/cjohansen/Sinon.JS#sinon-2.0",
+    "sinon-chai": "2.7.0",
+    "webpack-stream": "2.1.0"
   },
   "dependencies": {
     "eventric": "0.14.0",
