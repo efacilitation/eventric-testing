@@ -7,7 +7,7 @@ module.exports = (gulp) ->
     webpackConfig.output =
       libraryTarget: 'umd'
       library: 'eventric-testing'
-      filename: 'eventric-testing.js'
+      filename: 'eventric_testing.js'
 
     gulp.src ['src/index.coffee']
     .pipe webpack webpackConfig
