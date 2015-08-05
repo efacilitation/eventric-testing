@@ -1,8 +1,7 @@
-_                  = require 'lodash'
-eventric           = require 'eventric'
-domainEventFactory = require './domain_event_factory'
-stubFactory        = require './stub_factory'
-fakePromise        = require './fake_promise'
+_ = require 'lodash'
+eventric = require 'eventric'
+fakePromise = require './fake_promise'
+inmemoryRemote = require 'eventric-remote-inmemory'
 
 class RemoteFactory
 
@@ -12,8 +11,8 @@ class RemoteFactory
     wiredRemote._domainEvents = []
     wiredRemote._subscriberIds = []
     wiredRemote._commandStubs = []
-    wiredRemote.addClient 'inmemory', eventric.RemoteInMemory.client
-    wiredRemote.set 'default client', 'inmemory'
+    wiredRemote._context = eventric.context contextName
+    wiredRemote.setClient inmemoryRemote.client
 
     wiredRemote.$populateWithDomainEvent = (domainEventName, aggregateId, domainEventPayload) ->
       @_domainEvents.push @_createDomainEvent domainEventName, aggregateId, domainEventPayload
@@ -22,7 +21,7 @@ class RemoteFactory
     wiredRemote.$emitDomainEvent = (domainEventName, aggregateId, domainEventPayload) ->
       domainEvent = @_createDomainEvent domainEventName, aggregateId, domainEventPayload
       @_domainEvents.push domainEvent
-      endpoint = eventric.RemoteInMemory.endpoint
+      endpoint = inmemoryRemote.endpoint
       @_mostCurrentEmitOperation = @_mostCurrentEmitOperation.then ->
         contextEventPublish = endpoint.publish contextName, domainEvent
         contextAndNameEventPublish = endpoint.publish contextName, domainEvent.name, domainEvent
@@ -41,7 +40,7 @@ class RemoteFactory
       DomainEventClass = domainEvents[domainEventName]
       if not DomainEventClass
         throw new Error 'Trying to populate wired remote with unknown domain event ' + domainEventName
-      domainEventFactory.createDomainEvent contextName, domainEventName, DomainEventClass, aggregateId, domainEventPayload
+      wiredRemote._context.createDomainEvent domainEventName, DomainEventClass, domainEventPayload, {id: aggregateId}
 
 
     wiredRemote.findDomainEventsByName = (names) ->

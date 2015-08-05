@@ -34,7 +34,7 @@ describe 'remote factory', ->
 
   describe '#wiredRemote', ->
 
-    it 'should create a wired remote with helper functions', ->
+    it 'should create a wired remote with additional helper functions', ->
       expect(wiredRemote.$populateWithDomainEvent).to.be.a 'function'
       expect(wiredRemote.$emitDomainEvent).to.be.a 'function'
 
@@ -62,35 +62,36 @@ describe 'remote factory', ->
 
     describe 'emitting one event', ->
 
-      it 'should publish the domainevent with context', (done) ->
+      it 'should publish the domain event to all global subscribers', (done) ->
         wiredRemote.subscribeToAllDomainEvents (domainEvent) ->
           expect(domainEvent.payload.assignedCreated).to.be.ok
           done()
         wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
 
 
-      it 'should publish the domain event with context, eventName', (done) ->
+      it 'should publish the domain event to all subscribers with matching event name', (done) ->
         wiredRemote.subscribeToDomainEvent 'ExampleCreated', (domainEvent) ->
           expect(domainEvent.payload.assignedCreated).to.be.ok
           done()
         wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
 
 
-      it 'should publish the domain event with context, eventName, aggregateId', (done) ->
+      it 'should publish the domain event to all subscribers with matching event name and aggregate id', (done) ->
         wiredRemote.subscribeToDomainEventWithAggregateId 'ExampleCreated', 123, (domainEvent) ->
           expect(domainEvent.payload.assignedCreated).to.be.ok
           done()
         wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
 
 
-      it 'should populate the remote with the given event which is applied to later created projections', ->
-        wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+      it 'should apply the emitted event to projections', ->
         wiredRemote.addProjection 'ExampleProjection', ExampleProjection
         wiredRemote.initializeProjectionInstance 'ExampleProjection',
           aggregateId: 123
         .then (projectionId) ->
-          projection = wiredRemote.getProjectionInstance projectionId
-          expect(projection.projectedCreated).to.be.true
+          wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+          .then ->
+            projection = wiredRemote.getProjectionInstance projectionId
+            expect(projection.projectedCreated).to.be.true
 
 
     describe 'given two projections where the first projection handles one event and the other one both events', ->
@@ -162,8 +163,6 @@ describe 'remote factory', ->
 
   describe '#wiredRemote.command', ->
 
-    # TODO: "Error: Tried to handle Remote RPC with not registered context context"
-    # Add more expressing error message to eventric (the command is not found, the context is initialized!)
     it 'should delegate the command function if there is no command stub registered', ->
       wiredRemote.command 'myCustomCommand'
       .catch (error) ->

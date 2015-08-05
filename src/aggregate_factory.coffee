@@ -1,36 +1,19 @@
 eventric  = require 'eventric'
-Aggregate = eventric.Aggregate
-Context = eventric.Context
-
-stubFactory = require './stub_factory'
 
 class AggregateFactory
 
-  fakeAggregate: (AggregateClass) ->
-    aggregate = new AggregateClass
-    aggregate.$emitDomainEvent = stubFactory.stub()
-    aggregate
-
-
-  wiredAggregate: (AggregateClass, domainEvents) ->
-    aggregate = @instantiateAggregateWithFakeContext AggregateClass, domainEvents
-    aggregate.instance
-
-
-  instantiateAggregateWithFakeContext: (AggregateClass, domainEvents) ->
-    fakeContext = @_createFakeContext domainEvents
-    new Aggregate fakeContext, eventric, 'Aggregate', AggregateClass
-
-
-  _createFakeContext: (domainEvents) ->
-    contextFake =
-      _eventric: eventric
-      name: 'eventric-testing'
-
-    name: contextFake.name
-    getDomainEvent: (name) -> domainEvents[name]
-    createDomainEvent: ->
-      Context::createDomainEvent.apply contextFake, arguments
+  createAggregateInstance: (AggregateClass, domainEvents) ->
+    context = eventric.context "EventricTesting-#{Math.random()}"
+    context.addAggregate 'test', AggregateClass
+    context.defineDomainEvents domainEvents
+    context.addCommandHandlers CreateAggregate: -> @$aggregate.create 'test'
+    context.initialize()
+    .then ->
+      context.command 'CreateAggregate'
+    .then (aggregate) ->
+      context.destroy()
+      .then ->
+        return aggregate
 
 
 module.exports = new AggregateFactory

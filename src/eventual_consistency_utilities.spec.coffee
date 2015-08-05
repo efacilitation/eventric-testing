@@ -1,54 +1,8 @@
-describe 'command/query factory', ->
+describe 'eventual consistency utilities', ->
 
   eventric = require 'eventric'
 
-  commandQueryFactory = require './command_query_factory'
-  stubFactory = require './stub_factory'
-
-  beforeEach ->
-    stub = sandbox.stub()
-    stubFactory.setStubMethod -> stub
-    stubFactory.setConfigureReturnValueMethod (stub, returnValue) -> stub.returns returnValue
-
-  describe '#wiredCommandHandler', ->
-
-    it 'should return a command handler with all eventric components injected and exposed', ->
-      commandHandler = ->
-        expect(@$adapter).to.be.a 'function'
-        expect(@$adapter).to.equal wiredCommandHandler.$adapter
-        expect(@$aggregate).to.be.an 'object'
-        expect(@$aggregate).to.equal wiredCommandHandler.$aggregate
-        expect(@$domainService).to.be.a 'function'
-        expect(@$domainService).to.equal wiredCommandHandler.$domainService
-        expect(@$query).to.be.a 'function'
-        expect(@$query).to.equal wiredCommandHandler.$query
-        expect(@$projectionStore).to.be.a 'function'
-        expect(@$projectionStore).to.equal wiredCommandHandler.$projectionStore
-        expect(@$emitDomainEvent).to.be.a 'function'
-        expect(@$emitDomainEvent).to.equal wiredCommandHandler.$emitDomainEvent
-      wiredCommandHandler = commandQueryFactory.wiredCommandHandler commandHandler
-      wiredCommandHandler()
-
-
-  describe '#wiredQueryHandler', ->
-
-    it 'should return a query handler with all eventric components injected and exposed', ->
-      queryHandler = ->
-        expect(@$adapter).to.be.a 'function'
-        expect(@$adapter).to.equal wiredQueryHandler.$adapter
-        expect(@$aggregate).to.be.an 'object'
-        expect(@$aggregate).to.equal wiredQueryHandler.$aggregate
-        expect(@$domainService).to.be.a 'function'
-        expect(@$domainService).to.equal wiredQueryHandler.$domainService
-        expect(@$query).to.be.a 'function'
-        expect(@$query).to.equal wiredQueryHandler.$query
-        expect(@$projectionStore).to.be.a 'function'
-        expect(@$projectionStore).to.equal wiredQueryHandler.$projectionStore
-        expect(@$emitDomainEvent).to.be.a 'function'
-        expect(@$emitDomainEvent).to.equal wiredQueryHandler.$emitDomainEvent
-      wiredQueryHandler = commandQueryFactory.wiredCommandHandler queryHandler
-      wiredQueryHandler()
-
+  eventualConsistencyUtilities = require './eventual_consistency_utilities'
 
   describe '#waitForQueryToReturnResult', ->
 
@@ -59,7 +13,7 @@ describe 'command/query factory', ->
       exampleContext.addQueryHandlers getSomething: queryStub
       exampleContext.initialize()
       .then ->
-        commandQueryFactory.waitForQueryToReturnResult exampleContext, 'getSomething', queryParams
+        eventualConsistencyUtilities.waitForQueryToReturnResult exampleContext, 'getSomething', queryParams
       .then ->
         expect(queryStub).to.have.been.calledWith queryParams
 
@@ -70,7 +24,7 @@ describe 'command/query factory', ->
       exampleContext.addQueryHandlers getSomething: -> new Promise (resolve, reject) -> reject error
       exampleContext.initialize()
       .then ->
-        commandQueryFactory.waitForQueryToReturnResult exampleContext, 'getSomething'
+        eventualConsistencyUtilities.waitForQueryToReturnResult exampleContext, 'getSomething'
       .catch (receivedError) ->
         expect(receivedError).to.equal error
 
@@ -80,7 +34,7 @@ describe 'command/query factory', ->
       exampleContext.addQueryHandlers getSomething: -> new Promise (resolve, reject) -> reject 'error'
       exampleContext.initialize()
       .then ->
-        commandQueryFactory.waitForQueryToReturnResult exampleContext, 'getSomething'
+        eventualConsistencyUtilities.waitForQueryToReturnResult exampleContext, 'getSomething'
       .catch (error) ->
         expect(error).to.equal 'error'
 
@@ -92,7 +46,7 @@ describe 'command/query factory', ->
         new Promise (resolve) -> resolve queryResult
       exampleContext.initialize()
       .then ->
-        commandQueryFactory.waitForQueryToReturnResult exampleContext, 'getSomething'
+        eventualConsistencyUtilities.waitForQueryToReturnResult exampleContext, 'getSomething'
       .then (receivedResult) ->
         expect(receivedResult).to.equal queryResult
 
@@ -109,7 +63,7 @@ describe 'command/query factory', ->
             resolve {}
       exampleContext.initialize()
       .then ->
-        commandQueryFactory.waitForQueryToReturnResult exampleContext, 'getSomething'
+        eventualConsistencyUtilities.waitForQueryToReturnResult exampleContext, 'getSomething'
       .then ->
         expect(callCount).to.equal 5
 
@@ -123,7 +77,7 @@ describe 'command/query factory', ->
           , 100
       exampleContext.initialize()
       .then ->
-        commandQueryFactory.waitForQueryToReturnResult exampleContext, 'getSomething', {foo: 'bar'}, 50
+        eventualConsistencyUtilities.waitForQueryToReturnResult exampleContext, 'getSomething', {foo: 'bar'}, 50
       .catch (error) ->
         expect(error).to.be.an.instanceof Error
         expect(error.message).to.contain 'Example'
@@ -140,7 +94,7 @@ describe 'command/query factory', ->
       exampleContext.addCommandHandlers DoSomething: commandStub
       exampleContext.initialize()
       .then ->
-        commandQueryFactory.waitForCommandToResolve exampleContext, 'DoSomething', commandParams
+        eventualConsistencyUtilities.waitForCommandToResolve exampleContext, 'DoSomething', commandParams
       .then ->
         expect(commandStub).to.have.been.calledWith commandParams
 
@@ -152,7 +106,7 @@ describe 'command/query factory', ->
         new Promise (resolve) -> resolve commandResult
       exampleContext.initialize()
       .then ->
-        commandQueryFactory.waitForCommandToResolve exampleContext, 'DoSomething'
+        eventualConsistencyUtilities.waitForCommandToResolve exampleContext, 'DoSomething'
       .then (receivedResult) ->
         expect(receivedResult).to.equal commandResult
 
@@ -169,7 +123,7 @@ describe 'command/query factory', ->
             reject()
       exampleContext.initialize()
       .then ->
-        commandQueryFactory.waitForCommandToResolve exampleContext, 'DoSomething'
+        eventualConsistencyUtilities.waitForCommandToResolve exampleContext, 'DoSomething'
       .then ->
         expect(callCount).to.equal 5
 
@@ -183,7 +137,7 @@ describe 'command/query factory', ->
           , 100
       exampleContext.initialize()
       .then ->
-        commandQueryFactory.waitForCommandToResolve exampleContext, 'DoSomething', {foo: 'bar'}, 50
+        eventualConsistencyUtilities.waitForCommandToResolve exampleContext, 'DoSomething', {foo: 'bar'}, 50
       .catch (error) ->
         expect(error).to.be.an.instanceof Error
         expect(error.message).to.contain 'Example'
@@ -195,35 +149,35 @@ describe 'command/query factory', ->
 
     it 'should call the given promise factory', ->
       promiseFactoryStub = sandbox.stub().returns new Promise (resolve) -> resolve true
-      commandQueryFactory.waitForResult promiseFactoryStub
+      eventualConsistencyUtilities.waitForResult promiseFactoryStub
       .then ->
         expect(promiseFactoryStub).to.have.been.called
 
 
     it 'should resolve given a promise resolves with an object', ->
       promiseFactory = -> new Promise (resolve) -> resolve {}
-      waitForResult= commandQueryFactory.waitForResult promiseFactory
+      waitForResult= eventualConsistencyUtilities.waitForResult promiseFactory
       .then ->
         expect(waitForResult).to.be.ok
 
 
     it 'should resolve given a promise resolves with true', ->
       promiseFactory = -> new Promise (resolve) -> resolve true
-      waitForResult = commandQueryFactory.waitForResult promiseFactory
+      waitForResult = eventualConsistencyUtilities.waitForResult promiseFactory
       .then ->
         expect(waitForResult).to.be.ok
 
 
     it 'should resolve given a promise resolves with false', ->
       promiseFactory = -> new Promise (resolve) -> resolve false
-      waitForResult = commandQueryFactory.waitForResult promiseFactory
+      waitForResult = eventualConsistencyUtilities.waitForResult promiseFactory
       .then ->
         expect(waitForResult).to.be.ok
 
 
     it 'should not resolve given a promise returns undefined', ->
       promiseFactory = -> new Promise (resolve) -> resolve undefined
-      commandQueryFactory.waitForResult promiseFactory, 0
+      eventualConsistencyUtilities.waitForResult promiseFactory, 0
       .catch (error) ->
         expect(error).to.be.ok
 
@@ -231,7 +185,7 @@ describe 'command/query factory', ->
     it 'should resolve with the result given a promise factory which resolves with a result', ->
       result = {}
       promiseFactory = -> new Promise (resolve) -> resolve result
-      commandQueryFactory.waitForResult promiseFactory
+      eventualConsistencyUtilities.waitForResult promiseFactory
       .then (receivedResult) ->
         expect(receivedResult).to.equal result
 
@@ -246,7 +200,7 @@ describe 'command/query factory', ->
             resolve {}
           else
             resolve()
-      commandQueryFactory.waitForResult promiseFactory
+      eventualConsistencyUtilities.waitForResult promiseFactory
       .then ->
         expect(callCount).to.equal 3
 
@@ -254,7 +208,7 @@ describe 'command/query factory', ->
     it 'should reject with an error given a promise factory which rejects', ->
       error = new Error
       promiseFactory = -> new Promise (resolve, reject) -> reject error
-      commandQueryFactory.waitForResult promiseFactory
+      eventualConsistencyUtilities.waitForResult promiseFactory
       .catch (receviedError) ->
         expect(receviedError).to.equal error
 
@@ -265,7 +219,7 @@ describe 'command/query factory', ->
           setTimeout ->
             resolve()
           , 100
-      commandQueryFactory.waitForResult promiseFactory, 50
+      eventualConsistencyUtilities.waitForResult promiseFactory, 50
       .catch (error) ->
         expect(error).to.be.an.instanceof Error
 
