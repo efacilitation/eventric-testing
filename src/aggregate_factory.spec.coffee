@@ -22,9 +22,7 @@ describe 'aggregate factory', ->
 
     beforeEach ->
       sandbox.spy ExampleAggregate::, 'create'
-      aggregateFactory.createAggregate
-        AggregateClass: ExampleAggregate
-        domainEvents: domainEvents
+      aggregateFactory.createAggregate ExampleAggregate, domainEvents
       .then (_exampleAggregate) ->
         exampleAggregate = _exampleAggregate
 
@@ -43,9 +41,7 @@ describe 'aggregate factory', ->
 
 
     it 'should create an aggregate capable of emitting and handling domain events', ->
-      aggregateFactory.createAggregate
-        AggregateClass: ExampleAggregate
-        domainEvents: domainEvents
+      aggregateFactory.createAggregate ExampleAggregate, domainEvents
       .then (exampleAggregate) ->
         exampleAggregate.create()
         expect(exampleAggregate.$emitDomainEvent).to.be.a 'function'
