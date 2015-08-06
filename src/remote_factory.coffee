@@ -12,6 +12,7 @@ class RemoteFactory
     wiredRemote._subscriberIds = []
     wiredRemote._commandStubs = []
     wiredRemote._context = eventric.context contextName
+    wiredRemote._context.defineDomainEvents domainEvents
     wiredRemote.setClient inmemoryRemote.client
 
     wiredRemote.$populateWithDomainEvent = (domainEventName, aggregateId, domainEventPayload) ->
@@ -40,7 +41,7 @@ class RemoteFactory
       DomainEventClass = domainEvents[domainEventName]
       if not DomainEventClass
         throw new Error 'Trying to populate wired remote with unknown domain event ' + domainEventName
-      wiredRemote._context.createDomainEvent domainEventName, DomainEventClass, domainEventPayload, {id: aggregateId}
+      wiredRemote._context.createDomainEvent domainEventName, domainEventPayload, {id: aggregateId}
 
 
     wiredRemote.findDomainEventsByName = (names) ->

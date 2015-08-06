@@ -46,7 +46,7 @@
     "webpack-stream": "2.1.0"
   },
   "dependencies": {
-    "eventric": "0.14.0",
+    "eventric": "0.17.1",
     "eventric-remote-inmemory": "0.1.1",
     "lodash": "3.8.0"
   },
