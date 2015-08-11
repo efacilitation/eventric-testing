@@ -20,14 +20,14 @@ class AggregateFactory
 
 
   _createAggregateClassWithFakeCreateFunction: (AggregateClass) ->
-    WrappedAggregteClass = ->
+    WrappedAggregateClass = ->
       aggregateInstance = new AggregateClass
       originalCreate = aggregateInstance.create
       aggregateInstance.create = ->
         aggregateInstance.create = originalCreate
       return aggregateInstance
 
-    return WrappedAggregteClass
+    return WrappedAggregateClass
 
 
 module.exports = new AggregateFactory
