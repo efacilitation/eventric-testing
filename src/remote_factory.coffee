@@ -129,7 +129,7 @@ class RemoteFactory
         for domainEvent in filteredCommandStub.domainEvents
           emitDomainEventAsync domainEvent
 
-      fakePromise.resolve()
+      fakePromise.resolveAsync()
 
     wiredRemote
 
