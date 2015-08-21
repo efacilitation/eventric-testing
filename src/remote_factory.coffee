@@ -3,6 +3,10 @@ eventric = require 'eventric'
 fakePromise = require './fake_promise'
 inmemoryRemote = require 'eventric-remote-inmemory'
 
+# TODO: Find a better way to solve the dependency to these eventric internal components
+DomainEvent = require 'eventric/src/domain_event'
+domainEventIdGenerator = require 'eventric/src/aggregate/domain_event_id_generator'
+
 class RemoteFactory
 
   wiredRemote: (contextName, domainEvents) ->
@@ -37,11 +41,24 @@ class RemoteFactory
       wiredRemote._mostCurrentEmitOperation
 
 
-    wiredRemote._createDomainEvent = (domainEventName, aggregateId, domainEventPayload) ->
-      DomainEventClass = domainEvents[domainEventName]
-      if not DomainEventClass
-        throw new Error 'Trying to populate wired remote with unknown domain event ' + domainEventName
-      wiredRemote._context.createDomainEvent domainEventName, domainEventPayload, {id: aggregateId}
+    wiredRemote._createDomainEvent = (domainEventName, aggregateId, domainEventConstructorParams) ->
+
+      DomainEventPayloadConstructor = wiredRemote._context.getDomainEventPayloadConstructor domainEventName
+
+      if !DomainEventPayloadConstructor
+        throw new Error "Tried to create domain event '#{domainEventName}' which is not defined"
+
+      payload = {}
+      DomainEventPayloadConstructor.apply payload, [domainEventConstructorParams]
+
+      new DomainEvent
+        id: domainEventIdGenerator.generateId()
+        name: domainEventName
+        aggregate:
+          id: aggregateId
+          name: 'EventricTesting'
+        context: @_context.name
+        payload: payload
 
 
     wiredRemote.findDomainEventsByName = (names) ->
