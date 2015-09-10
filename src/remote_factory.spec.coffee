@@ -2,19 +2,8 @@ describe 'remote factory', ->
 
   remoteFactory = require './remote_factory'
 
-  class ExampleProjection
-    initialize: (params, done) ->
-      @$subscribeHandlersWithAggregateId params.aggregateId
-      done()
-
-
-    handleExampleCreated: (domainEvent) ->
-      @projectedCreated = domainEvent.payload.assignedCreated
-
-
-    handleExampleModified: (domainEvent) ->
-      @projectedModified = domainEvent.payload.assignedModified
-
+  exampleProjection = null
+  wiredRemote = null
 
   domainEvents =
     ExampleCreated: (params) ->
@@ -23,8 +12,22 @@ describe 'remote factory', ->
       @assignedModified = params.emittedModified
 
 
-  wiredRemote = null
   beforeEach ->
+    exampleProjection =
+
+      initialize: (params, done) ->
+        @$subscribeHandlersWithAggregateId params.aggregateId
+        done()
+
+
+      handleExampleCreated: (domainEvent) ->
+        @projectedCreated = domainEvent.payload.assignedCreated
+
+
+      handleExampleModified: (domainEvent) ->
+        @projectedModified = domainEvent.payload.assignedModified
+
+
     wiredRemote = remoteFactory.wiredRemote 'context', domainEvents
 
 
@@ -44,13 +47,10 @@ describe 'remote factory', ->
     it 'should populate the remote with the given event which is applied to later created projections', ->
       wiredRemote.$populateWithDomainEvent 'ExampleCreated', 123, emittedCreated: true
       wiredRemote.$populateWithDomainEvent 'ExampleModified', 123, emittedModified: true
-      wiredRemote.addProjection 'ExampleProjection', ExampleProjection
-      wiredRemote.initializeProjectionInstance 'ExampleProjection',
-        aggregateId: 123
-      .then (projectionId) ->
-        projection = wiredRemote.getProjectionInstance projectionId
-        expect(projection.projectedCreated).to.be.true
-        expect(projection.projectedModified).to.be.true
+      wiredRemote.initializeProjection exampleProjection, aggregateId: 123
+      .then ->
+        expect(exampleProjection.projectedCreated).to.be.true
+        expect(exampleProjection.projectedModified).to.be.true
 
 
     it 'should throw an error if the event to populate with is not registered', ->
@@ -84,22 +84,20 @@ describe 'remote factory', ->
 
 
       it 'should apply the emitted event to projections', ->
-        wiredRemote.addProjection 'ExampleProjection', ExampleProjection
-        wiredRemote.initializeProjectionInstance 'ExampleProjection',
-          aggregateId: 123
-        .then (projectionId) ->
+        wiredRemote.initializeProjection exampleProjection, aggregateId: 123
+        .then ->
           wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
-          .then ->
-            projection = wiredRemote.getProjectionInstance projectionId
-            expect(projection.projectedCreated).to.be.true
+        .then ->
+          expect(exampleProjection.projectedCreated).to.be.true
 
 
     describe 'given two projections where the first projection handles one event and the other one both events', ->
 
-      projection = null
+      firstProjection = null
+      secondProjection = null
 
       beforeEach ->
-        class FirstProjection
+        firstProjection =
           initialize: (params, done) ->
             @$subscribeHandlersWithAggregateId params.aggregateId
             done()
@@ -107,7 +105,7 @@ describe 'remote factory', ->
           handleExampleCreated: (domainEvent) ->
 
 
-        class SecondProjection
+        secondProjection =
           initialize: (params, done) ->
             @$subscribeHandlersWithAggregateId params.aggregateId
             @actions = []
@@ -120,22 +118,15 @@ describe 'remote factory', ->
             @actions.push 'modified'
 
 
-        wiredRemote.addProjection 'FirstProjection', FirstProjection
-        wiredRemote.addProjection 'SecondProjection', SecondProjection
-        wiredRemote.initializeProjectionInstance 'FirstProjection',
-          aggregateId: 123
-        .then (projectionId) ->
-          wiredRemote.initializeProjectionInstance 'SecondProjection',
-            aggregateId: 123
-        .then (projectionId) ->
-          projection = wiredRemote.getProjectionInstance projectionId
+        wiredRemote.initializeProjection firstProjection, aggregateId: 123
+        wiredRemote.initializeProjection secondProjection, aggregateId: 123
 
 
       it 'should emit the domain events to the second projection in the correct order', (done) ->
         wiredRemote.subscribeToDomainEvent 'ExampleModified', ->
           setTimeout ->
-            expect(projection.actions[0]).to.equal 'created'
-            expect(projection.actions[1]).to.equal 'modified'
+            expect(secondProjection.actions[0]).to.equal 'created'
+            expect(secondProjection.actions[1]).to.equal 'modified'
             done()
         wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
         wiredRemote.$emitDomainEvent 'ExampleModified', 123, emittedModified: true
@@ -193,28 +184,28 @@ describe 'remote factory', ->
 
   describe '#wiredRemote.$destroy', ->
 
-    class ExampleReportingProjection
-      initialize: (params, done) ->
-        @exampleCount = 0
-        @$subscribeHandlersWithAggregateId params.aggregateId
-        done()
+    exampleReportingProjection = null
 
-      handleExampleCreated: ->
-        @exampleCount++
+    beforeEach ->
+      exampleReportingProjection =
+        initialize: (params, done) ->
+          @exampleCount = 0
+          @$subscribeHandlersWithAggregateId params.aggregateId
+          done()
+
+        handleExampleCreated: ->
+          @exampleCount++
 
 
     it 'should remove the stored domain events', ->
       projection = null
       wiredRemote.$populateWithDomainEvent 'ExampleCreated', 123, emittedCreated: true
       wiredRemote.$destroy()
-      wiredRemote.addProjection 'ExampleReportingProjection', ExampleReportingProjection
-      wiredRemote.initializeProjectionInstance 'ExampleReportingProjection',
-        aggregateId: 123
-      .then (projectionId) ->
-        projection = wiredRemote.getProjectionInstance projectionId
+      wiredRemote.initializeProjection exampleReportingProjection, aggregateId: 123
+      .then ->
         wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
       .then ->
-        expect(projection.exampleCount).to.equal 1
+        expect(exampleReportingProjection.exampleCount).to.equal 1
 
 
     it 'should unsubscribe all subscribers', (done) ->
