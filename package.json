@@ -1,6 +1,6 @@
 {
   "name": "eventric-testing",
-  "version": "0.11.2",
+  "version": "0.12.0",
   "description": "Testing helpers for eventric.js",
   "keywords": [
     "behavior-first",
@@ -46,7 +46,7 @@
     "webpack-stream": "2.1.0"
   },
   "dependencies": {
-    "eventric": "0.20.*",
+    "eventric": "0.21.*",
     "eventric-remote-inmemory": "0.1.1",
     "lodash": "3.8.0"
   },
