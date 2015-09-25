@@ -34,30 +34,6 @@ describe 'remote factory', ->
   afterEach ->
     wiredRemote.$destroy()
 
-
-  describe '#wiredRemote', ->
-
-    it 'should create a wired remote with additional helper functions', ->
-      expect(wiredRemote.$populateWithDomainEvent).to.be.a 'function'
-      expect(wiredRemote.$emitDomainEvent).to.be.a 'function'
-
-
-  describe '#wiredRemote.$populateWithDomainEvent', ->
-
-    it 'should populate the remote with the given event which is applied to later created projections', ->
-      wiredRemote.$populateWithDomainEvent 'ExampleCreated', 123, emittedCreated: true
-      wiredRemote.$populateWithDomainEvent 'ExampleModified', 123, emittedModified: true
-      wiredRemote.initializeProjection exampleProjection, aggregateId: 123
-      .then ->
-        expect(exampleProjection.projectedCreated).to.be.true
-        expect(exampleProjection.projectedModified).to.be.true
-
-
-    it 'should throw an error if the event to populate with is not registered', ->
-      wiredRemote = remoteFactory.wiredRemote 'context', {}
-      expect(-> wiredRemote.populateWithDomainEvent 'Foobar').to.throw Error
-
-
   describe '#wiredRemote.$emitDomainEvent', ->
 
     describe 'emitting one event', ->
@@ -199,7 +175,7 @@ describe 'remote factory', ->
 
     it 'should remove the stored domain events', ->
       projection = null
-      wiredRemote.$populateWithDomainEvent 'ExampleCreated', 123, emittedCreated: true
+      wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
       wiredRemote.$destroy()
       wiredRemote.initializeProjection exampleReportingProjection, aggregateId: 123
       .then ->

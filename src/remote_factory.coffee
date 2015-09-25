@@ -19,10 +19,6 @@ class RemoteFactory
     wiredRemote._context.defineDomainEvents domainEvents
     wiredRemote.setClient inmemoryRemote.client
 
-    wiredRemote.$populateWithDomainEvent = (domainEventName, aggregateId, domainEventPayload) ->
-      @_domainEvents.push @_createDomainEvent domainEventName, aggregateId, domainEventPayload
-
-
     wiredRemote.$emitDomainEvent = (domainEventName, aggregateId, domainEventPayload) ->
       domainEvent = @_createDomainEvent domainEventName, aggregateId, domainEventPayload
       @_domainEvents.push domainEvent
