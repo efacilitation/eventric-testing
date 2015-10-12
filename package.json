@@ -1,6 +1,6 @@
 {
   "name": "eventric-testing",
-  "version": "0.13.0",
+  "version": "0.13.1",
   "description": "Testing helpers for eventric.js",
   "keywords": [
     "behavior-first",
