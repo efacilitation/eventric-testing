@@ -1,9 +1,6 @@
 require('es6-promise').polyfill()
 
-if typeof window isnt 'undefined'
-  root = window
-else
-  root = global
+root = if window? then window else global
 
 if !root._spec_setup
   root.sinon    = require 'sinon'
@@ -12,7 +9,9 @@ if !root._spec_setup
   root.sandbox  = sinon.sandbox.create()
 
   sinonChai = require 'sinon-chai'
-  chai.use sinonChai
+  isSinonChaiIncludedAsBrowserPackage = typeof sinonChai is 'function'
+  if isSinonChaiIncludedAsBrowserPackage
+    chai.use sinonChai
   root._spec_setup = true
 
 
