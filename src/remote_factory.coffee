@@ -1,5 +1,4 @@
-_ = require 'lodash'
-eventric = require 'eventric'
+equal = require 'deep-equal'
 fakePromise = require './fake_promise'
 inmemoryRemote = require 'eventric-remote-inmemory'
 
@@ -9,13 +8,16 @@ domainEventIdGenerator = require 'eventric/src/aggregate/domain_event_id_generat
 
 class RemoteFactory
 
+  initialize: (@_eventric) ->
+
+
   wiredRemote: (contextName, domainEvents) ->
-    wiredRemote = eventric.remote contextName
+    wiredRemote = @_eventric.remote contextName
     wiredRemote._mostCurrentEmitOperation = fakePromise.resolve()
     wiredRemote._domainEvents = []
     wiredRemote._subscriberIds = []
     wiredRemote._commandStubs = []
-    wiredRemote._context = eventric.context contextName
+    wiredRemote._context = @_eventric.context contextName
     wiredRemote._context.defineDomainEvents domainEvents
     wiredRemote.setClient inmemoryRemote.client
 
@@ -38,7 +40,6 @@ class RemoteFactory
 
 
     wiredRemote._createDomainEvent = (domainEventName, aggregateId, domainEventConstructorParams) ->
-
       DomainEventPayloadConstructor = wiredRemote._context.getDomainEventPayloadConstructor domainEventName
 
       if !DomainEventPayloadConstructor
@@ -126,8 +127,7 @@ class RemoteFactory
     originalCommand = wiredRemote.command
     wiredRemote.command = (command, payload) ->
       filteredCommandStubs = @_commandStubs.filter (commandStub) ->
-        return false unless command is commandStub.command
-        _.isEqual payload, commandStub.payload
+        return command is commandStub.command and equal payload, commandStub.payload
 
       unless filteredCommandStubs.length
         return originalCommand.apply @, arguments

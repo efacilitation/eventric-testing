@@ -2,6 +2,11 @@ describe 'aggregate factory', ->
 
   aggregateFactory = require './aggregate_factory'
 
+  beforeEach ->
+    eventric = require 'eventric'
+    aggregateFactory.initialize eventric
+
+
   describe '#createAggregate', ->
 
     class ExampleAggregate

@@ -15,5 +15,11 @@ if !root._spec_setup
   root._spec_setup = true
 
 
+beforeEach ->
+  eventricTesting = require './'
+  eventric = require 'eventric'
+  eventricTesting.initialize eventric
+
+
 afterEach ->
   sandbox.restore()

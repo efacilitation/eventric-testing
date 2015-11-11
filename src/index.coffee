@@ -1,5 +1,3 @@
-eventric = require 'eventric'
-
 aggregateFactory = require './aggregate_factory'
 fakePromise = require './fake_promise'
 eventualConsistencyUtilities = require './eventual_consistency_utilities'
@@ -8,6 +6,12 @@ remoteFactory = require './remote_factory'
 wiredRemotes = []
 
 class EventricTesting
+
+  initialize: (eventric) ->
+    @_eventric = eventric
+    aggregateFactory.initialize eventric
+    remoteFactory.initialize eventric
+
 
   resolve: (args...) ->
     fakePromise.resolve args...
@@ -37,7 +41,7 @@ class EventricTesting
 
   destroy: ->
     contexts = @_getRegisteredEventricContexts()
-    contexts.forEach @_makeContextInoperative
+    contexts.forEach (context) => @_makeContextInoperative context
     destroyContextsPromise = Promise.all contexts.map (context) -> context.destroy()
     destroyRemotesPromise = Promise.all wiredRemotes.map (wiredRemote) -> wiredRemote.$destroy()
     destroyRemotesPromise = destroyRemotesPromise.then -> wiredRemotes = []
@@ -62,12 +66,12 @@ class EventricTesting
 
   # TODO: Consider not to use private members for getting the contexts
   _getRegisteredEventricContexts: ->
-    return Object.keys(eventric._contexts).map (contextName) ->
-      eventric._contexts[contextName]
+    return Object.keys(@_eventric._contexts).map (contextName) =>
+      @_eventric._contexts[contextName]
 
 
   _makeContextInoperative: (context) ->
-    context.command = -> Promise.resolve eventric.generateUuid()
+    context.command = -> Promise.resolve @_eventric.generateUuid()
     context.getEventBus().publishDomainEvent = -> Promise.resolve()
     domainEventsStore = context.getDomainEventsStore()
     if domainEventsStore

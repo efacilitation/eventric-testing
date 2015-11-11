@@ -1,9 +1,10 @@
-eventric  = require 'eventric'
-
 class AggregateFactory
 
+  initialize: (@_eventric) ->
+
+
   createAggregate: (AggregateClass, domainEvents) ->
-    context = eventric.context "EventricTesting-#{Math.random()}"
+    context = @_eventric.context "EventricTesting-#{Math.random()}"
     context.addAggregate 'TestAggregate', @_createAggregateClassWithFakeCreateFunction AggregateClass
     context.defineDomainEvents domainEvents
     context.addCommandHandlers

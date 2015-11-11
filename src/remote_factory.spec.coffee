@@ -13,6 +13,9 @@ describe 'remote factory', ->
 
 
   beforeEach ->
+    eventric = require 'eventric'
+    remoteFactory.initialize eventric
+
     exampleProjection =
 
       initialize: (params, done) ->
