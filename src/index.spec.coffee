@@ -4,6 +4,10 @@ describe 'eventricTesting', ->
 
   eventricTesting = require './'
 
+  beforeEach ->
+    eventricTesting.initialize eventric
+
+
   describe '#destroy', ->
 
     it 'should make contexts inoperative', ->
@@ -19,6 +23,18 @@ describe 'eventricTesting', ->
           expect(context1.command).not.to.equal originalCommandFunction
           expect(context1.getDomainEventsStore().saveDomainEvent).not.to.equal originalSaveDomainEventFunction
           expect(context1.getEventBus().publishDomainEvent).not.to.equal originalPublishDomainEventFunction
+
+
+    it 'should replace the command function of a context with a function resolving with a fake aggregate id', ->
+      context1 = eventric.context 'context1'
+      context1.initialize()
+      .then ->
+        eventricTesting.destroy()
+      .then ->
+        context1.command 'Foo'
+      .then (aggregateId) ->
+        expect(aggregateId).to.be.a 'string'
+
 
 
     it 'should destroy all contexts', ->
