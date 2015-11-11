@@ -97,7 +97,7 @@ class RemoteFactory
     wiredRemote.$destroy = ->
       @_domainEvents = []
       @_commandStubs = []
-      @_mostCurrentEmitOperation.then =>
+      return @_mostCurrentEmitOperation.then =>
         @_mostCurrentEmitOperation = fakePromise.resolve()
         subscriptionRemovals = []
         for subscriberId in @_subscriberIds
