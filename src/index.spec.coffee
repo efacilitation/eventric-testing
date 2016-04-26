@@ -36,7 +36,6 @@ describe 'eventricTesting', ->
         expect(aggregateId).to.be.a 'string'
 
 
-
     it 'should destroy all contexts', ->
       context1 = eventric.context 'context1'
       context2 = eventric.context 'context2'
@@ -54,12 +53,12 @@ describe 'eventricTesting', ->
         expect(context2.destroy).to.have.been.called
 
 
-    it 'should destroy all wired remotes', ->
-      wiredRemote1  = eventricTesting.wiredRemote 'context1'
-      wiredRemote2  = eventricTesting.wiredRemote 'context2'
-      sandbox.spy wiredRemote1, '$destroy'
-      sandbox.spy wiredRemote2, '$destroy'
+    it 'should destroy all fake remote contexts', ->
+      fakeRemoteContext1 = eventricTesting.setupFakeRemoteContext 'context1'
+      fakeRemoteContext2 = eventricTesting.setupFakeRemoteContext 'context2'
+      sandbox.spy fakeRemoteContext1, '$destroy'
+      sandbox.spy fakeRemoteContext2, '$destroy'
       eventricTesting.destroy()
       .then ->
-        expect(wiredRemote1.$destroy).to.have.been.calledOnce
-        expect(wiredRemote2.$destroy).to.have.been.calledOnce
+        expect(fakeRemoteContext1.$destroy).to.have.been.calledOnce
+        expect(fakeRemoteContext2.$destroy).to.have.been.calledOnce

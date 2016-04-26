@@ -3,7 +3,7 @@ describe 'remote factory', ->
   remoteFactory = require './remote_factory'
 
   exampleProjection = null
-  wiredRemote = null
+  fakeRemoteContext = null
 
   domainEvents =
     ExampleCreated: (params) ->
@@ -31,41 +31,42 @@ describe 'remote factory', ->
         @projectedModified = domainEvent.payload.assignedModified
 
 
-    wiredRemote = remoteFactory.wiredRemote 'context', domainEvents
+    fakeRemoteContext = remoteFactory.setupFakeRemoteContext 'context', domainEvents
 
 
   afterEach ->
-    wiredRemote.$destroy()
+    fakeRemoteContext.$destroy()
 
-  describe '#wiredRemote.$emitDomainEvent', ->
+
+  describe '#fakeRemoteContext.$emitDomainEvent', ->
 
     describe 'emitting one event', ->
 
       it 'should publish the domain event to all global subscribers', (done) ->
-        wiredRemote.subscribeToAllDomainEvents (domainEvent) ->
+        fakeRemoteContext.subscribeToAllDomainEvents (domainEvent) ->
           expect(domainEvent.payload.assignedCreated).to.be.ok
           done()
-        wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+        fakeRemoteContext.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
 
 
       it 'should publish the domain event to all subscribers with matching event name', (done) ->
-        wiredRemote.subscribeToDomainEvent 'ExampleCreated', (domainEvent) ->
+        fakeRemoteContext.subscribeToDomainEvent 'ExampleCreated', (domainEvent) ->
           expect(domainEvent.payload.assignedCreated).to.be.ok
           done()
-        wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+        fakeRemoteContext.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
 
 
       it 'should publish the domain event to all subscribers with matching event name and aggregate id', (done) ->
-        wiredRemote.subscribeToDomainEventWithAggregateId 'ExampleCreated', 123, (domainEvent) ->
+        fakeRemoteContext.subscribeToDomainEventWithAggregateId 'ExampleCreated', 123, (domainEvent) ->
           expect(domainEvent.payload.assignedCreated).to.be.ok
           done()
-        wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+        fakeRemoteContext.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
 
 
       it 'should apply the emitted event to projections', ->
-        wiredRemote.initializeProjection exampleProjection, aggregateId: 123
+        fakeRemoteContext.initializeProjection exampleProjection, aggregateId: 123
         .then ->
-          wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+          fakeRemoteContext.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
         .then ->
           expect(exampleProjection.projectedCreated).to.be.true
 
@@ -97,71 +98,79 @@ describe 'remote factory', ->
             @actions.push 'modified'
 
 
-        wiredRemote.initializeProjection firstProjection, aggregateId: 123
-        wiredRemote.initializeProjection secondProjection, aggregateId: 123
+        fakeRemoteContext.initializeProjection firstProjection, aggregateId: 123
+        fakeRemoteContext.initializeProjection secondProjection, aggregateId: 123
 
 
       it 'should emit the domain events to the second projection in the correct order', (done) ->
-        wiredRemote.subscribeToDomainEvent 'ExampleModified', ->
+        fakeRemoteContext.subscribeToDomainEvent 'ExampleModified', ->
           setTimeout ->
             expect(secondProjection.actions[0]).to.equal 'created'
             expect(secondProjection.actions[1]).to.equal 'modified'
             done()
-        wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
-        wiredRemote.$emitDomainEvent 'ExampleModified', 123, emittedModified: true
+        fakeRemoteContext.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+        fakeRemoteContext.$emitDomainEvent 'ExampleModified', 123, emittedModified: true
 
 
-  describe '#wiredRemote.$onCommand', ->
+  describe '#fakeRemoteContext.$onCommand', ->
 
     it 'should emit the	associated DomainEvent if a specific command is called', (done) ->
-      wiredRemote.$onCommand 'myCommand',
+      fakeRemoteContext.$onCommand 'myCommand',
         myKey: 'myValue'
       .yieldsDomainEvent 'ExampleCreated', 123,
         emittedCreated: true
       .yieldsDomainEvent 'ExampleModified', 123,
         emittedModified: true
 
-      wiredRemote.subscribeToDomainEventWithAggregateId 'ExampleCreated', 123, (domainEvent) ->
+      fakeRemoteContext.subscribeToDomainEventWithAggregateId 'ExampleCreated', 123, (domainEvent) ->
         expect(domainEvent.payload.assignedCreated).to.be.true
 
-      wiredRemote.subscribeToDomainEventWithAggregateId 'ExampleModified', 123, (domainEvent) ->
+      fakeRemoteContext.subscribeToDomainEventWithAggregateId 'ExampleModified', 123, (domainEvent) ->
         expect(domainEvent.payload.assignedModified).to.be.true
         done()
 
-      wiredRemote.command 'myCommand', myKey: 'myValue'
+      fakeRemoteContext.command 'myCommand', myKey: 'myValue'
 
 
-  describe '#wiredRemote.command', ->
+  describe '#fakeRemoteContext.command', ->
 
-    it 'should delegate the command function if there is no command stub registered', ->
-      wiredRemote.command 'myCustomCommand'
-      .catch (error) ->
-        expect(error).to.be.defined
+    it 'should resolve if there is no command stub registered', ->
+      fakeRemoteContext.command 'myCustomCommand'
+      .then ->
+        expect(true).to.be.ok
 
 
     it 'should return a fake promise if a domain event is emitted', ->
-      wiredRemote.$onCommand 'myCommand',
+      fakeRemoteContext.$onCommand 'myCommand',
         myKey: 'myValue'
       .yieldsDomainEvent 'ExampleCreated', 123,
         emittedCreated: true
 
-      wiredRemote.command 'myCommand',
+      fakeRemoteContext.command 'myCommand',
         myKey: 'myValue'
       .then ->
         expect(true).to.be.ok
 
 
-  describe '#wiredRemote.$waitForEmitDomainEvent', ->
+  describe '#fakeRemoteContext.query', ->
+
+    it 'should resolve', ->
+      fakeRemoteContext.query 'myCustomQuery'
+      .then ->
+        expect(true).to.be.ok
+
+
+  describe '#fakeRemoteContext.$waitForEmitDomainEvent', ->
 
     it 'should wait until the most current emit domain event operation is finished', ->
       domainEventHandlerSpy = sandbox.spy()
-      wiredRemote.subscribeToDomainEvent 'ExampleCreated', domainEventHandlerSpy
-      wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
-      wiredRemote.$waitForEmitDomainEvent().then ->
+      fakeRemoteContext.subscribeToDomainEvent 'ExampleCreated', domainEventHandlerSpy
+      fakeRemoteContext.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+      fakeRemoteContext.$waitForEmitDomainEvent().then ->
         expect(domainEventHandlerSpy).to.have.been.called
 
 
-  describe '#wiredRemote.$destroy', ->
+  describe '#fakeRemoteContext.$destroy', ->
 
     exampleReportingProjection = null
 
@@ -178,35 +187,35 @@ describe 'remote factory', ->
 
     it 'should remove the stored domain events', ->
       projection = null
-      wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
-      wiredRemote.$destroy()
-      wiredRemote.initializeProjection exampleReportingProjection, aggregateId: 123
+      fakeRemoteContext.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+      fakeRemoteContext.$destroy()
+      fakeRemoteContext.initializeProjection exampleReportingProjection, aggregateId: 123
       .then ->
-        wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+        fakeRemoteContext.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
       .then ->
         expect(exampleReportingProjection.exampleCount).to.equal 1
 
 
     it 'should unsubscribe all subscribers', (done) ->
       domainEventHandler = sandbox.spy()
-      wiredRemote.subscribeToDomainEvent 'ExampleCreated', domainEventHandler
+      fakeRemoteContext.subscribeToDomainEvent 'ExampleCreated', domainEventHandler
       .then ->
-        wiredRemote.subscribeToDomainEvent 'ExampleCreated', domainEventHandler
+        fakeRemoteContext.subscribeToDomainEvent 'ExampleCreated', domainEventHandler
       .then ->
-        wiredRemote.subscribeToDomainEvent 'ExampleCreated', domainEventHandler
+        fakeRemoteContext.subscribeToDomainEvent 'ExampleCreated', domainEventHandler
       .then ->
-        wiredRemote.$destroy()
+        fakeRemoteContext.$destroy()
       .then ->
-        wiredRemote.subscribeToDomainEvent 'ExampleCreated', domainEventHandler
-        wiredRemote.subscribeToDomainEvent 'ExampleCreated', ->
+        fakeRemoteContext.subscribeToDomainEvent 'ExampleCreated', domainEventHandler
+        fakeRemoteContext.subscribeToDomainEvent 'ExampleCreated', ->
           expect(domainEventHandler.callCount).to.equal 1
           done()
-        wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+        fakeRemoteContext.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
 
 
     it 'should wait until the most current emit domain event operation is finished', ->
       domainEventHandlerSpy = sandbox.spy()
-      wiredRemote.subscribeToDomainEvent 'ExampleCreated', domainEventHandlerSpy
-      wiredRemote.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
-      wiredRemote.$destroy().then ->
+      fakeRemoteContext.subscribeToDomainEvent 'ExampleCreated', domainEventHandlerSpy
+      fakeRemoteContext.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+      fakeRemoteContext.$destroy().then ->
         expect(domainEventHandlerSpy).to.have.been.called

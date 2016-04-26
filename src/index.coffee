@@ -3,7 +3,7 @@ fakePromise = require './fake_promise'
 eventualConsistencyUtilities = require './eventual_consistency_utilities'
 remoteFactory = require './remote_factory'
 
-wiredRemotes = []
+fakeRemoteContexts = []
 
 class EventricTesting
 
@@ -33,18 +33,18 @@ class EventricTesting
     aggregateFactory.createAggregate args...
 
 
-  wiredRemote: (args...) ->
-    wiredRemote = remoteFactory.wiredRemote args...
-    wiredRemotes.push wiredRemote
-    wiredRemote
+  setupFakeRemoteContext: (args...) ->
+    fakeRemoteContext = remoteFactory.setupFakeRemoteContext args...
+    fakeRemoteContexts.push fakeRemoteContext
+    fakeRemoteContext
 
 
   destroy: ->
     contexts = @_getRegisteredEventricContexts()
     contexts.forEach (context) => @_makeContextInoperative context
     destroyContextsPromise = Promise.all contexts.map (context) -> context.destroy()
-    destroyRemotesPromise = Promise.all wiredRemotes.map (wiredRemote) -> wiredRemote.$destroy()
-    destroyRemotesPromise = destroyRemotesPromise.then -> wiredRemotes = []
+    destroyRemotesPromise = Promise.all fakeRemoteContexts.map (fakeRemoteContext) -> fakeRemoteContext.$destroy()
+    destroyRemotesPromise = destroyRemotesPromise.then -> fakeRemoteContexts = []
 
     return Promise.all [
       destroyContextsPromise

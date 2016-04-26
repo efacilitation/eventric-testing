@@ -11,17 +11,17 @@ class RemoteFactory
   initialize: (@_eventric) ->
 
 
-  wiredRemote: (contextName, domainEvents) ->
-    wiredRemote = @_eventric.remote contextName
-    wiredRemote._mostCurrentEmitOperation = fakePromise.resolve()
-    wiredRemote._domainEvents = []
-    wiredRemote._subscriberIds = []
-    wiredRemote._commandStubs = []
-    wiredRemote._context = @_eventric.context contextName
-    wiredRemote._context.defineDomainEvents domainEvents
-    wiredRemote.setClient inmemoryRemote.client
+  setupFakeRemoteContext: (contextName, domainEvents) ->
+    fakeRemoteContext = @_eventric.remoteContext contextName
+    fakeRemoteContext._mostCurrentEmitOperation = fakePromise.resolve()
+    fakeRemoteContext._domainEvents = []
+    fakeRemoteContext._subscriberIds = []
+    fakeRemoteContext._commandStubs = []
+    fakeRemoteContext._context = @_eventric.context contextName
+    fakeRemoteContext._context.defineDomainEvents domainEvents
+    fakeRemoteContext.setClient inmemoryRemote.client
 
-    wiredRemote.$emitDomainEvent = (domainEventName, aggregateId, domainEventPayload) ->
+    fakeRemoteContext.$emitDomainEvent = (domainEventName, aggregateId, domainEventPayload) ->
       domainEvent = @_createDomainEvent domainEventName, aggregateId, domainEventPayload
       @_domainEvents.push domainEvent
       endpoint = inmemoryRemote.endpoint
@@ -35,12 +35,12 @@ class RemoteFactory
           Promise.all([contextEventPublish, contextAndNameEventPublish])
 
 
-    wiredRemote.$waitForEmitDomainEvent = ->
-      wiredRemote._mostCurrentEmitOperation
+    fakeRemoteContext.$waitForEmitDomainEvent = ->
+      fakeRemoteContext._mostCurrentEmitOperation
 
 
-    wiredRemote._createDomainEvent = (domainEventName, aggregateId, domainEventConstructorParams) ->
-      DomainEventPayloadConstructor = wiredRemote._context.getDomainEventPayloadConstructor domainEventName
+    fakeRemoteContext._createDomainEvent = (domainEventName, aggregateId, domainEventConstructorParams) ->
+      DomainEventPayloadConstructor = fakeRemoteContext._context.getDomainEventPayloadConstructor domainEventName
 
       if !DomainEventPayloadConstructor
         throw new Error "Tried to create domain event '#{domainEventName}' which is not defined"
@@ -58,57 +58,57 @@ class RemoteFactory
         payload: payload
 
 
-    wiredRemote.findDomainEventsByName = (names) ->
+    fakeRemoteContext.findDomainEventsByName = (names) ->
       names = [names] unless names instanceof Array
       fakePromise.resolve @_domainEvents.filter (x) ->
         names.indexOf(x.name) > -1
 
 
-    wiredRemote.findDomainEventsByNameAndAggregateId = (names, aggregateIds) ->
+    fakeRemoteContext.findDomainEventsByNameAndAggregateId = (names, aggregateIds) ->
       names = [names] unless names instanceof Array
       aggregateIds = [aggregateIds] unless aggregateIds instanceof Array
       fakePromise.resolve @_domainEvents.filter (x) ->
         names.indexOf(x.name) > -1 and x.aggregate and aggregateIds.indexOf(x.aggregate.id) > -1
 
 
-    originalSubscribeToAllDomainEvents = wiredRemote.subscribeToAllDomainEvents
-    wiredRemote.subscribeToAllDomainEvents = ->
+    originalSubscribeToAllDomainEvents = fakeRemoteContext.subscribeToAllDomainEvents
+    fakeRemoteContext.subscribeToAllDomainEvents = ->
       originalSubscribeToAllDomainEvents.apply @, arguments
       .then (subscriberId) =>
         @_subscriberIds.push subscriberId
         subscriberId
 
 
-    originalSubscribeToDomainEvent = wiredRemote.subscribeToDomainEvent
-    wiredRemote.subscribeToDomainEvent = ->
+    originalSubscribeToDomainEvent = fakeRemoteContext.subscribeToDomainEvent
+    fakeRemoteContext.subscribeToDomainEvent = ->
       originalSubscribeToDomainEvent.apply @, arguments
       .then (subscriberId) =>
         @_subscriberIds.push subscriberId
         subscriberId
 
 
-    originalSubscribeToDomainEventWithAggregateId = wiredRemote.subscribeToDomainEventWithAggregateId
-    wiredRemote.subscribeToDomainEventWithAggregateId = ->
+    originalSubscribeToDomainEventWithAggregateId = fakeRemoteContext.subscribeToDomainEventWithAggregateId
+    fakeRemoteContext.subscribeToDomainEventWithAggregateId = ->
       originalSubscribeToDomainEventWithAggregateId.apply @, arguments
       .then (subscriberId) =>
         @_subscriberIds.push subscriberId
         subscriberId
 
 
-    wiredRemote.$destroy = ->
+    fakeRemoteContext.$destroy = ->
       @_domainEvents = []
       @_commandStubs = []
       return @_mostCurrentEmitOperation.then =>
         @_mostCurrentEmitOperation = fakePromise.resolve()
         subscriptionRemovals = []
         for subscriberId in @_subscriberIds
-          subscriptionRemovals.push wiredRemote.unsubscribeFromDomainEvent subscriberId
+          subscriptionRemovals.push fakeRemoteContext.unsubscribeFromDomainEvent subscriberId
         @_subscriberIds = []
         Promise.all subscriptionRemovals
 
 
 
-    wiredRemote.$onCommand = (command, payload) ->
+    fakeRemoteContext.$onCommand = (command, payload) ->
       commandStub =
         command: command
         payload: payload
@@ -124,13 +124,13 @@ class RemoteFactory
       commandStub
 
 
-    originalCommand = wiredRemote.command
-    wiredRemote.command = (command, payload) ->
+    originalCommand = fakeRemoteContext.command
+    fakeRemoteContext.command = (command, payload) ->
       filteredCommandStubs = @_commandStubs.filter (commandStub) ->
         return command is commandStub.command and equal payload, commandStub.payload
 
       unless filteredCommandStubs.length
-        return originalCommand.apply @, arguments
+        return Promise.resolve()
 
       emitDomainEventAsync = (domainEvent) =>
         setTimeout =>
@@ -144,7 +144,11 @@ class RemoteFactory
 
       fakePromise.resolveAsync()
 
-    wiredRemote
+
+    fakeRemoteContext.query = ->
+      return Promise.resolve()
+
+    return fakeRemoteContext
 
 
 module.exports = new RemoteFactory
