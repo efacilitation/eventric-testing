@@ -1,10 +1,6 @@
 describe 'aggregate factory', ->
-
+  eventric = require 'eventric'
   aggregateFactory = require './aggregate_factory'
-
-  beforeEach ->
-    eventric = require 'eventric'
-    aggregateFactory.initialize eventric
 
 
   describe '#createAggregate', ->
@@ -27,9 +23,13 @@ describe 'aggregate factory', ->
 
     beforeEach ->
       sandbox.spy ExampleAggregate::, 'create'
-      aggregateFactory.createAggregate ExampleAggregate, domainEvents
+      aggregateFactory.createAggregate eventric, ExampleAggregate, domainEvents
       .then (_exampleAggregate) ->
         exampleAggregate = _exampleAggregate
+
+
+    it 'should throw an error given no eventric instance', ->
+      expect(-> aggregateFactory.createAggregate null).to.throw Error, /eventric instance missing/
 
 
     it 'should create an aggregate instance of the given type', ->
@@ -46,7 +46,7 @@ describe 'aggregate factory', ->
 
 
     it 'should create an aggregate capable of emitting and handling domain events', ->
-      aggregateFactory.createAggregate ExampleAggregate, domainEvents
+      aggregateFactory.createAggregate eventric, ExampleAggregate, domainEvents
       .then (exampleAggregate) ->
         exampleAggregate.create()
         expect(exampleAggregate.$emitDomainEvent).to.be.a 'function'

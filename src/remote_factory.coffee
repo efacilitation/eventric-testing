@@ -8,16 +8,17 @@ domainEventIdGenerator = require 'eventric/src/aggregate/domain_event_id_generat
 
 class RemoteFactory
 
-  initialize: (@_eventric) ->
+  setupFakeRemoteContext: (eventric, contextName, domainEvents = {}) ->
+    if not eventric
+      throw new Error 'eventric instance missing'
 
+    fakeRemoteContext = eventric.remoteContext contextName
+    fakeRemoteContext._context = eventric.context contextName
 
-  setupFakeRemoteContext: (contextName, domainEvents) ->
-    fakeRemoteContext = @_eventric.remoteContext contextName
     fakeRemoteContext._mostCurrentEmitOperation = fakePromise.resolve()
     fakeRemoteContext._domainEvents = []
     fakeRemoteContext._subscriberIds = []
     fakeRemoteContext._commandStubs = []
-    fakeRemoteContext._context = @_eventric.context contextName
     fakeRemoteContext._context.defineDomainEvents domainEvents
     fakeRemoteContext.setClient inmemoryRemote.client
 
@@ -105,7 +106,6 @@ class RemoteFactory
           subscriptionRemovals.push fakeRemoteContext.unsubscribeFromDomainEvent subscriberId
         @_subscriberIds = []
         Promise.all subscriptionRemovals
-
 
 
     fakeRemoteContext.$onCommand = (command, payload) ->

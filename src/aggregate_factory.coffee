@@ -1,10 +1,9 @@
 class AggregateFactory
 
-  initialize: (@_eventric) ->
-
-
-  createAggregate: (AggregateClass, domainEvents) ->
-    context = @_eventric.context "EventricTesting-#{Math.random()}"
+  createAggregate: (eventric, AggregateClass, domainEvents) ->
+    if not eventric
+      throw new Error 'eventric instance missing'
+    context = eventric.context "EventricTesting-#{Math.random()}"
     context.addAggregate 'TestAggregate', @_createAggregateClassWithFakeCreateFunction AggregateClass
     context.defineDomainEvents domainEvents
     context.addCommandHandlers

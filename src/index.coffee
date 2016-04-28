@@ -7,12 +7,6 @@ fakeRemoteContexts = []
 
 class EventricTesting
 
-  initialize: (eventric) ->
-    @_eventric = eventric
-    aggregateFactory.initialize eventric
-    remoteFactory.initialize eventric
-
-
   resolve: (args...) ->
     fakePromise.resolve args...
 
@@ -39,9 +33,12 @@ class EventricTesting
     fakeRemoteContext
 
 
-  destroy: ->
-    contexts = @_getRegisteredEventricContexts()
-    contexts.forEach (context) => @_makeContextInoperative context
+  destroy: (eventric) ->
+    if not eventric
+      throw new Error 'eventric instance missing'
+
+    contexts = @_getRegisteredEventricContexts eventric
+    contexts.forEach (context) => @_makeContextInoperative eventric, context
     destroyContextsPromise = Promise.all contexts.map (context) -> context.destroy()
     destroyRemotesPromise = Promise.all fakeRemoteContexts.map (fakeRemoteContext) -> fakeRemoteContext.$destroy()
     destroyRemotesPromise = destroyRemotesPromise.then -> fakeRemoteContexts = []
@@ -65,13 +62,13 @@ class EventricTesting
 
 
   # TODO: Consider not to use private members for getting the contexts
-  _getRegisteredEventricContexts: ->
-    return Object.keys(@_eventric._contexts).map (contextName) =>
-      @_eventric._contexts[contextName]
+  _getRegisteredEventricContexts: (eventric) ->
+    return Object.keys(eventric._contexts).map (contextName) ->
+      eventric._contexts[contextName]
 
 
-  _makeContextInoperative: (context) ->
-    context.command = => Promise.resolve @_eventric.generateUuid()
+  _makeContextInoperative: (eventric, context) ->
+    context.command = => Promise.resolve eventric.generateUuid()
     context.getEventBus().publishDomainEvent = -> Promise.resolve()
     domainEventsStore = context.getDomainEventsStore()
     if domainEventsStore

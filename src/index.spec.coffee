@@ -1,14 +1,13 @@
 describe 'eventricTesting', ->
 
   eventric = require 'eventric'
-
   eventricTesting = require './'
 
-  beforeEach ->
-    eventricTesting.initialize eventric
-
-
   describe '#destroy', ->
+
+    it 'should throw an error given no eventric instance', ->
+      expect(-> eventricTesting.destroy null).to.throw Error, /eventric instance missing/
+
 
     it 'should make contexts inoperative', ->
       context1 = eventric.context 'context1'
@@ -18,7 +17,7 @@ describe 'eventricTesting', ->
         originalCommandFunction = context1.command
         originalSaveDomainEventFunction = context1.getDomainEventsStore().saveDomainEvent
         originalPublishDomainEventFunction = context1.getEventBus().publishDomainEvent
-        eventricTesting.destroy()
+        eventricTesting.destroy eventric
         .then ->
           expect(context1.command).not.to.equal originalCommandFunction
           expect(context1.getDomainEventsStore().saveDomainEvent).not.to.equal originalSaveDomainEventFunction
@@ -29,7 +28,7 @@ describe 'eventricTesting', ->
       context1 = eventric.context 'context1'
       context1.initialize()
       .then ->
-        eventricTesting.destroy()
+        eventricTesting.destroy eventric
       .then ->
         context1.command 'Foo'
       .then (aggregateId) ->
@@ -47,18 +46,18 @@ describe 'eventricTesting', ->
         context2.initialize()
       ]
       .then ->
-        eventricTesting.destroy()
+        eventricTesting.destroy eventric
       .then ->
         expect(context1.destroy).to.have.been.called
         expect(context2.destroy).to.have.been.called
 
 
     it 'should destroy all fake remote contexts', ->
-      fakeRemoteContext1 = eventricTesting.setupFakeRemoteContext 'context1'
-      fakeRemoteContext2 = eventricTesting.setupFakeRemoteContext 'context2'
+      fakeRemoteContext1 = eventricTesting.setupFakeRemoteContext eventric, 'context1'
+      fakeRemoteContext2 = eventricTesting.setupFakeRemoteContext eventric, 'context2'
       sandbox.spy fakeRemoteContext1, '$destroy'
       sandbox.spy fakeRemoteContext2, '$destroy'
-      eventricTesting.destroy()
+      eventricTesting.destroy eventric
       .then ->
         expect(fakeRemoteContext1.$destroy).to.have.been.calledOnce
         expect(fakeRemoteContext2.$destroy).to.have.been.calledOnce

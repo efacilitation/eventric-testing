@@ -14,7 +14,6 @@ describe 'remote factory', ->
 
   beforeEach ->
     eventric = require 'eventric'
-    remoteFactory.initialize eventric
 
     exampleProjection =
 
@@ -31,11 +30,17 @@ describe 'remote factory', ->
         @projectedModified = domainEvent.payload.assignedModified
 
 
-    fakeRemoteContext = remoteFactory.setupFakeRemoteContext 'context', domainEvents
+    fakeRemoteContext = remoteFactory.setupFakeRemoteContext eventric, 'context', domainEvents
 
 
   afterEach ->
     fakeRemoteContext.$destroy()
+
+
+  describe '#setupFakeRemoteContext', ->
+
+    it 'should throw an error given no eventric instance', ->
+      expect(-> remoteFactory.setupFakeRemoteContext null).to.throw Error, /eventric instance missing/
 
 
   describe '#fakeRemoteContext.$emitDomainEvent', ->
