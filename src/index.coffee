@@ -68,7 +68,8 @@ class EventricTesting
 
 
   _makeContextInoperative: (eventric, context) ->
-    context.command = => Promise.resolve eventric.generateUuid()
+    context.command = ->
+      Promise.resolve eventric.generateUuid()
     context.getEventBus().publishDomainEvent = -> Promise.resolve()
     domainEventsStore = context.getDomainEventsStore()
     if domainEventsStore
