@@ -142,7 +142,7 @@ class RemoteFactory
         for domainEvent in filteredCommandStub.domainEvents
           emitDomainEventAsync domainEvent
 
-      fakePromise.resolveAsync()
+      return Promise.resolve()
 
 
     fakeRemoteContext.query = ->

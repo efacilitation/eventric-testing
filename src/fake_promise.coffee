@@ -21,16 +21,6 @@ class FakePromise
       @
 
 
-  resolveAsync: (args...) ->
-    then: (callback = ->) ->
-      setTimeout ->
-        callback.apply this, args
-      , 0
-      @
-    catch: ->
-      @
-
-
   rejectAsync: (args...) ->
     then: ->
       @

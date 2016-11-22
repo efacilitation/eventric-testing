@@ -15,10 +15,6 @@ class EventricTesting
     fakePromise.reject args...
 
 
-  resolveAsync: (args...) ->
-    fakePromise.resolveAsync args...
-
-
   rejectAsync: (args...) ->
     fakePromise.rejectAsync args...
 
