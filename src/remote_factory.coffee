@@ -4,7 +4,6 @@ inmemoryRemote = require 'eventric-remote-inmemory'
 
 # TODO: Find a better way to solve the dependency to these eventric internal components
 DomainEvent = require 'eventric/src/domain_event'
-domainEventIdGenerator = require 'eventric/src/aggregate/domain_event_id_generator'
 
 class RemoteFactory
 
@@ -50,7 +49,7 @@ class RemoteFactory
       DomainEventPayloadConstructor.apply payload, [domainEventConstructorParams]
 
       new DomainEvent
-        id: domainEventIdGenerator.generateId()
+        id: eventric.generateUuid()
         name: domainEventName
         aggregate:
           id: aggregateId
@@ -124,7 +123,6 @@ class RemoteFactory
       commandStub
 
 
-    originalCommand = fakeRemoteContext.command
     fakeRemoteContext.command = (command, payload) ->
       filteredCommandStubs = @_commandStubs.filter (commandStub) ->
         return command is commandStub.command and equal payload, commandStub.payload

@@ -156,7 +156,7 @@ describe 'eventual consistency utilities', ->
 
     it 'should resolve given a promise resolves with an object', ->
       promiseFactory = -> new Promise (resolve) -> resolve {}
-      waitForResult= eventualConsistencyUtilities.waitForResult promiseFactory
+      waitForResult = eventualConsistencyUtilities.waitForResult promiseFactory
       .then ->
         expect(waitForResult).to.be.ok
 
@@ -222,5 +222,3 @@ describe 'eventual consistency utilities', ->
       eventualConsistencyUtilities.waitForResult promiseFactory, 50
       .catch (error) ->
         expect(error).to.be.an.instanceof Error
-
-

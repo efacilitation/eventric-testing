@@ -115,7 +115,8 @@ describe 'remote factory', ->
             done()
         fakeRemoteContext.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
         fakeRemoteContext.$emitDomainEvent 'ExampleModified', 123, emittedModified: true
-
+        return
+        
 
   describe '#fakeRemoteContext.$onCommand', ->
 
@@ -135,6 +136,7 @@ describe 'remote factory', ->
         done()
 
       fakeRemoteContext.command 'myCommand', myKey: 'myValue'
+      return
 
 
   describe '#fakeRemoteContext.command', ->
@@ -216,6 +218,7 @@ describe 'remote factory', ->
           expect(domainEventHandler.callCount).to.equal 1
           done()
         fakeRemoteContext.$emitDomainEvent 'ExampleCreated', 123, emittedCreated: true
+      return
 
 
     it 'should wait until the most current emit domain event operation is finished', ->
